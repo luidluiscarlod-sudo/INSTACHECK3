@@ -46,15 +46,18 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const apiUrl = `https://whatsapp-data1.p.rapidapi.com/number/${fullPhone}?base64=false&telegram=false&google=false`
+    const apiUrl = "https://whatsapp-profile-data1.p.rapidapi.com/WhatsappProfilePhotoWithToken"
 
     const response = await fetch(apiUrl, {
-      method: "GET",
+      method: "POST",
       headers: {
-        "X-RapidAPI-Key": "663753efb4mshcbbdde11e811789p149069jsnd73bd1ba7a71",
-        "X-RapidAPI-Host": "whatsapp-data1.p.rapidapi.com",
+        "x-rapidapi-key": "42865ce77amsh6b3ec8ac168e4c3p1ae1b6jsndc1ea20ce2d0",
+        "x-rapidapi-host": "whatsapp-profile-data1.p.rapidapi.com",
         "Content-Type": "application/json",
       },
+      body: JSON.stringify({
+        phone_number: fullPhone,
+      }),
       signal: AbortSignal.timeout?.(10_000),
     })
 

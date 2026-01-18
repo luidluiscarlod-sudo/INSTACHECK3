@@ -1,32 +1,55 @@
 "use client"
 
 import type React from "react"
-import { useState, useCallback, useEffect, useRef } from "react" // Import useRef
+import { useState, useCallback, useEffect, useRef, Suspense } from "react" // Import useRef and Suspense
+import { useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import {
-  Camera,
-  Flame,
-  Facebook,
-  CheckCircle,
-  MessageCircle,
-  Heart,
-  Upload,
-  ScanEye,
-  User,
-  Calendar,
-  Beaker as Gender,
-  Home,
-  Compass,
-  MessageSquare,
-  X,
-  Star,
-  MapPin,
-  Lock,
-  Phone,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react"
+import { Camera, Flame, Facebook, CheckCircle, MessageCircle, Heart, Upload, ScanEye, User, Calendar, Beaker as Gender, Home, Compass, MessageSquare, X, Star, MapPin, Lock, Phone, ChevronLeft, ChevronRight } from "lucide-react"
 import { fetchInstagramProfile, fetchInstagramPosts } from "@/lib/instagram-tracker"
+import { AlertTriangle } from "lucide-react"
+
+// Device limit system - 1 search per device
+const LIMIT_KEY = "instacheck_search_limit"
+const MAX_SEARCHES = 1
+
+interface SearchLimitData {
+  searchedUsername: string
+  searchedAt: number
+  profilePicUrl?: string
+  fullName?: string
+}
+
+const getSearchLimitData = (): SearchLimitData | null => {
+  try {
+    const data = localStorage.getItem(LIMIT_KEY)
+    if (data) {
+      return JSON.parse(data)
+    }
+  } catch (e) {
+    console.error("[v0] Error reading search limit:", e)
+  }
+  return null
+}
+
+const setSearchLimitData = (username: string, profilePicUrl?: string, fullName?: string) => {
+  try {
+    const data: SearchLimitData = {
+      searchedUsername: username,
+      searchedAt: Date.now(),
+      profilePicUrl,
+      fullName
+    }
+    localStorage.setItem(LIMIT_KEY, JSON.stringify(data))
+    console.log("[v0] Search limit set for:", username)
+  } catch (e) {
+    console.error("[v0] Error setting search limit:", e)
+  }
+}
+
+const hasReachedLimit = (): boolean => {
+  const data = getSearchLimitData()
+  return data !== null
+}
 
 const sanitizeUsername = (username: string): string => {
   let u = (username || "").trim()
@@ -39,7 +62,7 @@ const setAvatarLocalCache = (user: string, url: string) => {
   if (!user || !url) return
   try {
     const key = "igAvatarCacheV1"
-    const cache = JSON.JSON.parse(localStorage.getItem(key) || "{}") || {}
+    const cache = JSON.parse(localStorage.getItem(key) || "{}") || {}
     cache[user] = { url, ts: Date.now() }
     localStorage.setItem(key, JSON.stringify(cache))
     console.log("[v0] Cached Instagram avatar for:", user)
@@ -126,6 +149,10 @@ export default function SpySystem() {
   const [instagramPosts, setInstagramPosts] = useState<any[]>([])
   const [isLoadingPosts, setIsLoadingPosts] = useState(false)
 
+  // Limit system states
+  const [showLimitReached, setShowLimitReached] = useState(false)
+  const [limitData, setLimitData] = useState<SearchLimitData | null>(null)
+
   const debounceTimer = useRef<NodeJS.Timeout | null>(null)
 
   // Data for random notifications
@@ -177,6 +204,18 @@ export default function SpySystem() {
     "/images/male-placeholder-6.jpeg", // Nova imagem masculina
     "/images/male-placeholder-7.png", // Nova imagem masculina
   ]
+
+  // Check for search limit on mount
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const existingLimit = getSearchLimitData()
+      if (existingLimit) {
+        console.log("[v0] Search limit found:", existingLimit)
+        setLimitData(existingLimit)
+        setShowLimitReached(true)
+      }
+    }
+  }, [])
 
   // Cleanup for image preview URL
   useEffect(() => {
@@ -442,14 +481,27 @@ export default function SpySystem() {
         // Update animation frame for image cycling
         setAnimationFrame(frame)
       }
-      if (progress >= 100) {
-        clearInterval(interval)
-        setTimeout(() => {
-          nextStage()
-        }, 500)
-      }
-    }, intervalDuration)
-  }, [nextStage, investigatedPhone])
+if (progress >= 100) {
+  clearInterval(interval)
+  // Save search limit when analysis completes
+  const username = sanitizeUsername(investigatedHandle)
+  setSearchLimitData(
+    username,
+    instagramProfile?.profile_pic_url,
+    instagramProfile?.full_name
+  )
+  setLimitData({
+    searchedUsername: username,
+    searchedAt: Date.now(),
+    profilePicUrl: instagramProfile?.profile_pic_url,
+    fullName: instagramProfile?.full_name
+  })
+  setTimeout(() => {
+  nextStage()
+  }, 500)
+  }
+  }, intervalDuration)
+  }, [nextStage, investigatedPhone, investigatedHandle, instagramProfile])
 
   const fetchWhatsAppPhoto = async (phoneNumber: string, countryCode: string) => {
     console.log("[v0] fetchWhatsAppPhoto called with:", { phoneNumber, countryCode })
@@ -2085,24 +2137,124 @@ export default function SpySystem() {
     }
   }
 
-  return (
+  // Limit Reached Component
+  const LimitReachedScreen = () => (
     <div className="relative min-h-screen flex items-center justify-center p-4 overflow-hidden bg-gradient-to-br from-black via-gray-900 to-red-900 font-inter">
-      {/* Changed font-roboto to font-inter */}
-      {/* Background grid pattern */}
-      <div
-        className={`absolute inset-0 opacity-10 animate-pulse-grid`}
+      {/* Matrix-style background */}
+      <div 
+        className="absolute inset-0 opacity-20 overflow-hidden"
         style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%239C92AC' fillOpacity='0.2' fillRule='evenodd'%3E%3Ccircle cx='3' cy='3' r='3'/%3E%3Ccircle cx='13' cy='13' r='3'/%3E%3C/g%3E%3C/svg%3E")`,
+          fontFamily: 'monospace',
+          color: '#0f0',
+          fontSize: '10px',
+          lineHeight: '12px',
         }}
-      />
-      {/* Content container with transition */}
-      <div
-        className={`relative z-10 transition-opacity duration-500 ${
-          showContent ? "opacity-100" : "opacity-0 pointer-events-none"
-        }`}
       >
-        {renderStage()}
+        {Array.from({ length: 20 }).map((_, i) => (
+          <div key={i} className="whitespace-nowrap animate-pulse" style={{ animationDelay: `${i * 0.1}s` }}>
+            {Array.from({ length: 100 }).map(() => String.fromCharCode(Math.floor(Math.random() * 94) + 33)).join('')}
+          </div>
+        ))}
+      </div>
+
+      <div className="relative z-10 w-full max-w-md mx-auto">
+        <div className="bg-gray-900/95 rounded-2xl p-8 border border-gray-800 shadow-2xl">
+          {/* Profile Picture with Rainbow Ring */}
+          <div className="flex justify-center mb-6">
+            <div className="relative">
+              <div 
+                className="w-32 h-32 rounded-full p-1"
+                style={{
+                  background: 'conic-gradient(from 0deg, #ff0080, #ff8c00, #40e0d0, #7b68ee, #ff0080)',
+                }}
+              >
+                <div className="w-full h-full rounded-full overflow-hidden bg-gray-800">
+                  {limitData?.profilePicUrl ? (
+                    <img
+                      src={`/api/instagram-image-proxy?url=${encodeURIComponent(limitData.profilePicUrl)}`}
+                      alt="Profile"
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = "/placeholder-user.jpg"
+                      }}
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <User className="text-gray-500" size={48} />
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Limit Reached Title */}
+          <div className="text-center mb-6">
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <AlertTriangle className="text-red-500" size={24} />
+              <h2 className="text-2xl font-bold text-red-500">Limit Reached</h2>
+            </div>
+            <p className="text-gray-300">
+              You have already used your <span className="font-bold text-white">free search</span>
+            </p>
+            <p className="text-gray-300">
+              to spy on <span className="text-purple-400 font-semibold">@{limitData?.searchedUsername}</span>
+            </p>
+          </div>
+
+          {/* VIP Access CTA */}
+          <div className="text-center mb-6">
+            <p className="text-gray-400 mb-4">
+              Get <span className="font-bold text-white">VIP access</span> and have full Instagram access right now!
+            </p>
+            <Button
+              onClick={() => window.location.href = "https://pay.mycheckoutt.com/01997889-d90f-7176-b1ad-330b2aadd114?ref="}
+              className="w-full py-4 text-lg font-bold uppercase bg-gradient-to-r from-purple-600 to-pink-500 text-white shadow-lg hover:from-purple-700 hover:to-pink-600 transition-all duration-300 transform hover:scale-105"
+            >
+              <Lock className="mr-2" size={20} />
+              Unlock VIP Access
+            </Button>
+          </div>
+
+          {/* Warning Box */}
+          <div className="p-4 bg-red-900/30 border border-red-700 rounded-lg">
+            <p className="text-sm text-center">
+              <span className="font-bold text-red-400">Your identity is compromised!</span>{" "}
+              <span className="text-gray-300">
+                {limitData?.fullName || limitData?.searchedUsername} may be notified about your spying, only VIP members have their privacy preserved during spying.
+              </span>
+            </p>
+          </div>
+        </div>
       </div>
     </div>
+  )
+
+  // Show limit reached screen if limit is exceeded
+  if (showLimitReached && limitData) {
+    return <LimitReachedScreen />
+  }
+
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-black via-gray-900 to-red-900"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div></div>}>
+      <div className="relative min-h-screen flex items-center justify-center p-4 overflow-hidden bg-gradient-to-br from-black via-gray-900 to-red-900 font-inter">
+        {/* Changed font-roboto to font-inter */}
+        {/* Background grid pattern */}
+        <div
+          className={`absolute inset-0 opacity-10 animate-pulse-grid`}
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%239C92AC' fillOpacity='0.2' fillRule='evenodd'%3E%3Ccircle cx='3' cy='3' r='3'/%3E%3Ccircle cx='13' cy='13' r='3'/%3E%3C/g%3E%3C/svg%3E")`,
+          }}
+        />
+        {/* Content container with transition */}
+        <div
+          className={`relative z-10 transition-opacity duration-500 ${
+            showContent ? "opacity-100" : "opacity-0 pointer-events-none"
+          }`}
+        >
+          {renderStage()}
+        </div>
+      </div>
+    </Suspense>
   )
 }
