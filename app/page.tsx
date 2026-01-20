@@ -2,7 +2,6 @@
 
 import type React from "react"
 import { useState, useCallback, useEffect, useRef, Suspense } from "react" // Import useRef and Suspense
-import { useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Camera, Flame, Facebook, CheckCircle, MessageCircle, Heart, Upload, ScanEye, User, Calendar, Beaker as Gender, Home, Compass, MessageSquare, X, Star, MapPin, Lock, Phone, ChevronLeft, ChevronRight } from "lucide-react"
 import { fetchInstagramProfile, fetchInstagramPosts } from "@/lib/instagram-tracker"
@@ -19,16 +18,23 @@ interface SearchLimitData {
   fullName?: string
 }
 
+export default function SpySystemPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-black via-gray-900 to-red-900"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500"></div></div>}>
+      <SpySystemContent />
+    </Suspense>
+  )
+}
+
 const getSearchLimitData = (): SearchLimitData | null => {
   try {
     const data = localStorage.getItem(LIMIT_KEY)
-    if (data) {
-      return JSON.parse(data)
-    }
+    if (!data) return null
+    return JSON.parse(data) as SearchLimitData
   } catch (e) {
-    console.error("[v0] Error reading search limit:", e)
+    console.error("[v0] Error getting search limit:", e)
+    return null
   }
-  return null
 }
 
 const setSearchLimitData = (username: string, profilePicUrl?: string, fullName?: string) => {
@@ -112,7 +118,7 @@ const getProfileFromCache = (user: string): any | null => {
   return null
 }
 
-export default function SpySystem() {
+function SpySystemContent() {
   // All state and functionality remains the same
   const [currentStage, setCurrentStage] = useState(0)
   const [showContent, setShowContent] = useState(true)
@@ -564,6 +570,16 @@ if (progress >= 100) {
     }
   }
 
+  // Warning component for all stages
+  const LimitWarningBanner = () => (
+    <div className="w-full max-w-md mx-auto mb-4 px-4 py-2 bg-yellow-500/20 border border-yellow-500/50 rounded-lg">
+      <p className="text-center text-xs text-yellow-400">
+        <AlertTriangle className="inline-block mr-1 mb-0.5" size={12} />
+        <span className="font-semibold">Attention:</span> You only have <span className="font-bold text-white">1 FREE search</span> per device
+      </p>
+    </div>
+  )
+
   const renderStage = () => {
     // Determine the match image based on gender
     const matchImageSrc =
@@ -577,6 +593,7 @@ if (progress >= 100) {
       case 0:
         return (
           <div className="text-center space-y-8">
+            <LimitWarningBanner />
             <p className="text-4xl md:text-5xl font-bold text-white tracking-wider animate-pulse">INSTA CHECK 3</p>
             <h1 className="text-2xl md:text-3xl font-bold text-white tracking-wider animate-pulse">
               💔 FEELING BETRAYED?
@@ -620,6 +637,7 @@ if (progress >= 100) {
       case 1: // Age, Gender, Location, and Phone
         return (
           <div className="text-center space-y-6 px-4">
+            <LimitWarningBanner />
             <h2 className="text-2xl md:text-4xl font-bold text-white animate-fade-in">
               📊 <span className="text-pink-400">TARGET</span> PROFILE
             </h2>
@@ -1004,11 +1022,12 @@ if (progress >= 100) {
             </Button>
           </div>
         )
-      case 2: // OLD STAGE 1: Upload and Handle
-        return (
-          <div className="text-center space-y-8">
-            <p className="text-3xl md:text-4xl font-bold text-white animate-pulse">
-              📸 Select a photo for facial analysis...
+case 2: // OLD STAGE 1: Upload and Handle
+  return (
+  <div className="text-center space-y-8">
+  <LimitWarningBanner />
+  <p className="text-3xl md:text-4xl font-bold text-white animate-pulse">
+  📸 Select a photo for facial analysis...
             </p>
             <div className="relative w-full max-w-md mx-auto border-2 border-dashed border-gray-600 p-6 rounded-lg text-gray-400 flex flex-col items-center justify-center gap-3 bg-gray-800/30 hover:border-gray-500 transition-colors duration-200 cursor-pointer">
               <input
@@ -1216,12 +1235,13 @@ if (progress >= 100) {
             </Button>
           </div>
         )
-      case 3: // OLD STAGE 2: Detection and Notifications
-        return (
-          <div className="text-center space-y-8">
-            <div className="grid gap-3 text-left max-w-xl mx-auto">
-              <p className="text-lg md:text-xl text-green-400 flex items-center gap-2 animate-fade-in">
-                <CheckCircle className="text-green-400" size={28} /> Instagram account found. Last access: 3h ago.
+case 3: // OLD STAGE 2: Detection and Notifications
+  return (
+  <div className="text-center space-y-8">
+  <LimitWarningBanner />
+  <div className="grid gap-3 text-left max-w-xl mx-auto">
+  <p className="text-lg md:text-xl text-green-400 flex items-center gap-2 animate-fade-in">
+  <CheckCircle className="text-green-400" size={28} /> Instagram account found. Last access: 3h ago.
               </p>
               <p className="text-lg md:text-xl text-red-400 flex items-center gap-2 animate-fade-in-delay-1">
                 <Flame className="text-red-400" size={28} /> Hidden Tinder profile detected.
@@ -1670,10 +1690,11 @@ if (progress >= 100) {
             </Button>
           </div>
         )
-      case 4: // NEW STAGE: Tinder Likes Screen
-        return (
-          <div className="flex flex-col w-full max-w-md mx-auto bg-black text-white rounded-lg shadow-lg h-[calc(100vh-4rem)] overflow-y-auto">
-            {/* Top Bar */}
+case 4: // NEW STAGE: Tinder Likes Screen
+  return (
+  <div className="flex flex-col w-full max-w-md mx-auto bg-black text-white rounded-lg shadow-lg h-[calc(100vh-4rem)] overflow-y-auto">
+  <LimitWarningBanner />
+  {/* Top Bar */}
             <div className="relative flex items-center justify-between p-3 bg-gray-900 border-b border-gray-800 flex-shrink-0">
               {/* Left: User Profile */}
               <div className="flex items-center gap-2 z-10">
@@ -2070,12 +2091,13 @@ if (progress >= 100) {
             </Button>
           </div>
         )
-      case 5: // OLD STAGE 3: Revelation
-        return (
-          <div className="text-center space-y-8">
-            <div className="grid gap-3 text-left max-w-xl mx-auto">
-              <p className="text-lg md:text-xl text-white animate-fade-in">
-                <span className="text-red-400 font-bold">ALERT:</span> Private messages with suggestive content.
+case 5: // OLD STAGE 3: Revelation
+  return (
+  <div className="text-center space-y-8">
+  <LimitWarningBanner />
+  <div className="grid gap-3 text-left max-w-xl mx-auto">
+  <p className="text-lg md:text-xl text-white animate-fade-in">
+  <span className="text-red-400 font-bold">ALERT:</span> Private messages with suggestive content.
               </p>
               <p className="text-lg md:text-xl text-white animate-fade-in-delay-1">
                 <span className="text-red-400 font-bold">ALERT:</span> Likes on unknown profiles' photos.
@@ -2202,19 +2224,18 @@ if (progress >= 100) {
             </p>
           </div>
 
-          {/* VIP Access CTA */}
-          <div className="text-center mb-6">
-            <p className="text-gray-400 mb-4">
-              Get <span className="font-bold text-white">VIP access</span> and have full Instagram access right now!
-            </p>
-            <Button
-              onClick={() => window.location.href = "https://pay.mycheckoutt.com/01997889-d90f-7176-b1ad-330b2aadd114?ref="}
-              className="w-full py-4 text-lg font-bold uppercase bg-gradient-to-r from-purple-600 to-pink-500 text-white shadow-lg hover:from-purple-700 hover:to-pink-600 transition-all duration-300 transform hover:scale-105"
-            >
-              <Lock className="mr-2" size={20} />
-              Unlock VIP Access
-            </Button>
-          </div>
+{/* VIP Access CTA */}
+  <div className="text-center mb-6">
+  <p className="text-gray-400 mb-4">
+  Get <span className="font-bold text-white">VIP access</span> and have full Instagram access right now!
+  </p>
+  <Button
+    onClick={() => window.location.href = "https://pay.mycheckoutt.com/01997889-d90f-7176-b1ad-330b2aadd114?ref="}
+    className="w-full mt-4 px-10 py-5 text-xl font-bold uppercase bg-gradient-to-r from-red-700 to-black text-white shadow-lg hover:from-red-800 hover:to-gray-900 transition-all duration-300 transform hover:scale-105 animate-pulse-slow"
+  >
+    SEE FINAL RESULT
+  </Button>
+  </div>
 
           {/* Warning Box */}
           <div className="p-4 bg-red-900/30 border border-red-700 rounded-lg">
@@ -2236,25 +2257,23 @@ if (progress >= 100) {
   }
 
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-black via-gray-900 to-red-900"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div></div>}>
-      <div className="relative min-h-screen flex items-center justify-center p-4 overflow-hidden bg-gradient-to-br from-black via-gray-900 to-red-900 font-inter">
-        {/* Changed font-roboto to font-inter */}
-        {/* Background grid pattern */}
-        <div
-          className={`absolute inset-0 opacity-10 animate-pulse-grid`}
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%239C92AC' fillOpacity='0.2' fillRule='evenodd'%3E%3Ccircle cx='3' cy='3' r='3'/%3E%3Ccircle cx='13' cy='13' r='3'/%3E%3C/g%3E%3C/svg%3E")`,
-          }}
-        />
-        {/* Content container with transition */}
-        <div
-          className={`relative z-10 transition-opacity duration-500 ${
-            showContent ? "opacity-100" : "opacity-0 pointer-events-none"
-          }`}
-        >
-          {renderStage()}
-        </div>
+    <div className="relative min-h-screen flex items-center justify-center p-4 overflow-hidden bg-gradient-to-br from-black via-gray-900 to-red-900 font-inter">
+      {/* Changed font-roboto to font-inter */}
+      {/* Background grid pattern */}
+      <div
+        className={`absolute inset-0 opacity-10 animate-pulse-grid`}
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%239C92AC' fillOpacity='0.2' fillRule='evenodd'%3E%3Ccircle cx='3' cy='3' r='3'/%3E%3Ccircle cx='13' cy='13' r='3'/%3E%3C/g%3E%3C/svg%3E")`,
+        }}
+      />
+      {/* Content container with transition */}
+      <div
+        className={`relative z-10 transition-opacity duration-500 ${
+          showContent ? "opacity-100" : "opacity-0 pointer-events-none"
+        }`}
+      >
+        {renderStage()}
       </div>
-    </Suspense>
+    </div>
   )
 }
