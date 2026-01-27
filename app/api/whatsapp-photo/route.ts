@@ -28,6 +28,6 @@ module.exports = async (req, res) => {
     });
   });
 
-  apiReq.write(JSON.stringify({ phone_number }));
+  apiReq.write(JSON.stringify({ 5511999999 }));
   apiReq.end();
 };
