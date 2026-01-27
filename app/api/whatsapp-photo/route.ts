@@ -28,6 +28,11 @@ export async function POST(request: NextRequest) {
     const cleanNumber = phone.replace(/\D/g, "")
     const cleanCountryCode = countryCode?.replace(/\D/g, "") || ""
     const fullPhone = cleanCountryCode + cleanNumber
+    
+    console.log("[v0] ========== WHATSAPP API ROUTE ==========")
+    console.log("[v0] Phone received:", phone)
+    console.log("[v0] Country code received:", countryCode)
+    console.log("[v0] Full phone number:", fullPhone)
 
     // Verifica cache
     const cached = cache.get(fullPhone)
@@ -83,7 +88,9 @@ export async function POST(request: NextRequest) {
 
     const responseText = await response.text()
 
-    console.log("[v0] API Response body:", responseText)
+    console.log("[v0] ========== RAPIDAPI RESPONSE ==========")
+    console.log("[v0] API Response body (first 500 chars):", responseText.substring(0, 500))
+    console.log("[v0] Full response length:", responseText.length)
 
     let photoUrl: string
     try {

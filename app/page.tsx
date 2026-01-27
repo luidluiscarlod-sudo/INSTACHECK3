@@ -509,16 +509,18 @@ if (progress >= 100) {
   }, intervalDuration)
   }, [nextStage, investigatedPhone, investigatedHandle, instagramProfile])
 
-  const fetchWhatsAppPhoto = async (phoneNumber: string, countryCode: string) => {
-    console.log("[v0] fetchWhatsAppPhoto called with:", { phoneNumber, countryCode })
+const fetchWhatsAppPhoto = async (phoneNumber: string, countryCode: string) => {
+  console.log("[v0] ========== WHATSAPP PHOTO FETCH START ==========")
+  console.log("[v0] fetchWhatsAppPhoto called with:", { phoneNumber, countryCode })
+  console.log("[v0] Phone length:", phoneNumber?.length)
 
-    if (!phoneNumber || phoneNumber.length < 8) {
-      console.log("[v0] Phone number too short, aborting")
-      return
-    }
+  if (!phoneNumber || phoneNumber.length < 8) {
+  console.log("[v0] Phone number too short, aborting. Length:", phoneNumber?.length)
+  return
+  }
 
-    setIsLoadingPhoto(true)
-    console.log("[v0] Starting WhatsApp photo fetch...")
+  setIsLoadingPhoto(true)
+  console.log("[v0] Starting WhatsApp photo fetch for:", countryCode + phoneNumber)
 
     try {
       const response = await fetch("/api/whatsapp-photo", {
