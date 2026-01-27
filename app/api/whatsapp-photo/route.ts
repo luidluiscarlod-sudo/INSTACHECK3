@@ -1,15 +1,16 @@
 import { type NextRequest, NextResponse } from "next/server"
 
 // Cache para armazenar resultados por 5 minutos
-const cache = new Map<string, { result: string; timestamp: number }>()
+const cache = new Map<string, { result: any; timestamp: number }>()
 const CACHE_TTL = 5 * 60 * 1000 // 5 minutos
 
 export async function POST(request: NextRequest) {
-  // Fallback padrão caso a API falhe
+  // Fallback padrão caso a API falhe (Agora adaptado para validação)
   const fallbackPayload = {
-    success: true,
-    result: "https://i.postimg.cc/gcNd6QBM/img1.jpg",
-    is_photo_private: true,
+    success: false,
+    result: null,
+    error: "Validation unavailable",
+    exists: false // Assumindo false em caso de falha crítica
   }
 
   try {
@@ -29,20 +30,19 @@ export async function POST(request: NextRequest) {
     const cleanCountryCode = countryCode?.replace(/\D/g, "") || ""
     const fullPhone = cleanCountryCode + cleanNumber
     
-    console.log("[v0] ========== WHATSAPP API ROUTE ==========")
+    console.log("[v0] ========== WHATSAPP VALIDATOR ROUTE ==========")
     console.log("[v0] Phone received:", phone)
-    console.log("[v0] Country code received:", countryCode)
     console.log("[v0] Full phone number:", fullPhone)
 
     // Verifica cache
     const cached = cache.get(fullPhone)
     if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
-      console.log("[v0] Returning cached WhatsApp photo")
+      console.log("[v0] Returning cached status")
       return NextResponse.json(
         {
           success: true,
           result: cached.result,
-          is_photo_private: false,
+          from_cache: true
         },
         {
           status: 200,
@@ -51,17 +51,18 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const apiUrl = "https://whatsapp-profile-data1.p.rapidapi.com/WhatsappProfilePhotoWithToken"
+    // --- AQUI ESTÁ A MUDANÇA PARA A NOVA API ---
+    const apiUrl = "https://whatsapp-number-validator3.p.rapidapi.com/WhatsappNumberHasItWithToken"
 
     const response = await fetch(apiUrl, {
       method: "POST",
       headers: {
         "x-rapidapi-key": "42865ce77amsh6b3ec8ac168e4c3p1ae1b6jsndc1ea20ce2d0",
-        "x-rapidapi-host": "whatsapp-profile-data1.p.rapidapi.com",
+        "x-rapidapi-host": "whatsapp-number-validator3.p.rapidapi.com", // Novo Host
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        phone_number: fullPhone,
+        phone_number: fullPhone, // A nova API espera phone_number
       }),
       signal: AbortSignal.timeout?.(10_000),
     })
@@ -70,16 +71,15 @@ export async function POST(request: NextRequest) {
 
     // Tratamento de rate limit
     if (response.status === 429) {
-      console.log("[v0] Rate limit exceeded, returning fallback")
+      console.log("[v0] Rate limit exceeded")
       return NextResponse.json(fallbackPayload, {
         status: 200,
         headers: { "Access-Control-Allow-Origin": "*" },
       })
     }
 
-    // Verifica se a resposta foi bem-sucedida
     if (!response.ok) {
-      console.error("[v0] Erro ao buscar foto:", response.status)
+      console.error("[v0] Erro ao validar número:", response.status)
       return NextResponse.json(fallbackPayload, {
         status: 200,
         headers: { "Access-Control-Allow-Origin": "*" },
@@ -89,30 +89,18 @@ export async function POST(request: NextRequest) {
     const responseText = await response.text()
 
     console.log("[v0] ========== RAPIDAPI RESPONSE ==========")
-    console.log("[v0] API Response body (first 500 chars):", responseText.substring(0, 500))
-    console.log("[v0] Full response length:", responseText.length)
+    console.log("[v0] API Response body:", responseText.substring(0, 500))
 
-    let photoUrl: string
+    let apiResult: any
     try {
-      const jsonResponse = JSON.parse(responseText)
-      photoUrl = jsonResponse.profilePic || jsonResponse.url || jsonResponse.result || jsonResponse.photo_url
+      apiResult = JSON.parse(responseText)
     } catch {
-      // If not JSON, treat as direct URL
-      photoUrl = responseText.trim()
-    }
-
-    // Valida se a resposta contém uma URL válida
-    if (!photoUrl || photoUrl.trim() === "" || !photoUrl.startsWith("https://")) {
-      console.log("[v0] Invalid or empty response, returning fallback")
-      return NextResponse.json(fallbackPayload, {
-        status: 200,
-        headers: { "Access-Control-Allow-Origin": "*" },
-      })
+      apiResult = responseText.trim()
     }
 
     // Armazena no cache
     cache.set(fullPhone, {
-      result: photoUrl.trim(),
+      result: apiResult,
       timestamp: Date.now(),
     })
 
@@ -122,12 +110,10 @@ export async function POST(request: NextRequest) {
       cache.delete(oldestKey)
     }
 
-    // Retorna a URL da foto de perfil
     return NextResponse.json(
       {
         success: true,
-        result: photoUrl.trim(),
-        is_photo_private: false,
+        result: apiResult,
       },
       {
         status: 200,
