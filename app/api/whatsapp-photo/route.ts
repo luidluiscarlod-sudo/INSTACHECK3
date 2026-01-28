@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
         method: "GET",
         headers: {
           "x-rapidapi-key": "42865ce77amsh6b3ec8ac168e4c3p1ae1b6jsndc1ea20ce2d0",
-          "x-rapidapi-host": "whatsapp-data.p.rapidapi.com",
+          "x-rapidapi-host": "whatsapp-data1.p.rapidapi.com",
         },
       })
     } catch (fetchError) {
