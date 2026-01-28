@@ -212,19 +212,13 @@ function SpySystemContent() {
   ]
 
   // Check for search limit on mount
-  // TEMPORARILY DISABLED FOR TESTING - uncomment to enable limit
   useEffect(() => {
     if (typeof window !== "undefined") {
-      // Clear old limit for testing
-      localStorage.removeItem("instacheck_search_limit")
-      console.log("[v0] Limit cleared for testing")
-      
-      // const existingLimit = getSearchLimitData()
-      // if (existingLimit) {
-      //   console.log("[v0] Search limit found:", existingLimit)
-      //   setLimitData(existingLimit)
-      //   setShowLimitReached(true)
-      // }
+      const existingLimit = getSearchLimitData()
+      if (existingLimit) {
+        setLimitData(existingLimit)
+        setShowLimitReached(true)
+      }
     }
   }, [])
 
