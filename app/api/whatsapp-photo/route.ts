@@ -53,18 +53,26 @@ export async function POST(request: NextRequest) {
 
     const apiUrl = "https://whatsapp-profile-data1.p.rapidapi.com/WhatsappProfilePhotoWithToken"
 
-    const response = await fetch(apiUrl, {
-      method: "POST",
-      headers: {
-        "x-rapidapi-key": "42865ce77amsh6b3ec8ac168e4c3p1ae1b6jsndc1ea20ce2d0",
-        "x-rapidapi-host": "whatsapp-profile-data1.p.rapidapi.com",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        phone_number: fullPhone,
-      }),
-      signal: AbortSignal.timeout?.(10_000),
-    })
+    let response: Response
+    try {
+      response = await fetch(apiUrl, {
+        method: "POST",
+        headers: {
+          "x-rapidapi-key": "42865ce77amsh6b3ec8ac168e4c3p1ae1b6jsndc1ea20ce2d0",
+          "x-rapidapi-host": "whatsapp-profile-data1.p.rapidapi.com",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          phone_number: fullPhone,
+        }),
+      })
+    } catch (fetchError) {
+      console.error("[v0] Fetch error:", fetchError)
+      return NextResponse.json(fallbackPayload, {
+        status: 200,
+        headers: { "Access-Control-Allow-Origin": "*" },
+      })
+    }
 
     console.log("[v0] API Response status:", response.status)
 

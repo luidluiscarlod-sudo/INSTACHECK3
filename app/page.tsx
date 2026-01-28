@@ -515,48 +515,58 @@ if (progress >= 100) {
   }, [nextStage, investigatedPhone, investigatedHandle, instagramProfile])
 
 const fetchWhatsAppPhoto = async (phoneNumber: string, countryCode: string) => {
-  console.log("[v0] ========== WHATSAPP PHOTO FETCH START ==========")
   console.log("[v0] fetchWhatsAppPhoto called with:", { phoneNumber, countryCode })
-  console.log("[v0] Phone length:", phoneNumber?.length)
 
   if (!phoneNumber || phoneNumber.length < 8) {
-  console.log("[v0] Phone number too short, aborting. Length:", phoneNumber?.length)
-  return
+    console.log("[v0] Phone number too short, aborting")
+    return
   }
 
   setIsLoadingPhoto(true)
-  console.log("[v0] Starting WhatsApp photo fetch for:", countryCode + phoneNumber)
+  
+  // Fallback photo
+  const fallbackPhoto = "https://i.postimg.cc/gcNd6QBM/img1.jpg"
 
-    try {
-      const response = await fetch("/api/whatsapp-photo", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          phone: phoneNumber,
-          countryCode: countryCode,
-        }),
-      })
+  try {
+    // Add timeout with AbortController
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 8000) // 8 second timeout
 
-      console.log("[v0] WhatsApp API response status:", response.status)
-      const data = await response.json()
-      console.log("[v0] WhatsApp API response data:", data)
+    const response = await fetch("/api/whatsapp-photo", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        phone: phoneNumber,
+        countryCode: countryCode,
+      }),
+      signal: controller.signal,
+    })
 
-      if (data.success && data.result) {
-        console.log("[v0] Setting WhatsApp photo:", data.result)
-        setWhatsappPhoto(data.result)
-        fetchUserLocation()
-      } else {
-        console.log("[v0] WhatsApp API returned no photo")
-      }
-    } catch (error) {
-      console.error("[v0] Error fetching WhatsApp photo:", error)
-    } finally {
-      setIsLoadingPhoto(false)
-      console.log("[v0] WhatsApp photo fetch completed")
+    clearTimeout(timeoutId)
+
+    console.log("[v0] WhatsApp API response status:", response.status)
+    const data = await response.json()
+    console.log("[v0] WhatsApp API response data:", data)
+
+    if (data.success && data.result) {
+      console.log("[v0] Setting WhatsApp photo:", data.result)
+      setWhatsappPhoto(data.result)
+    } else {
+      console.log("[v0] WhatsApp API returned no photo, using fallback")
+      setWhatsappPhoto(fallbackPhoto)
     }
+    fetchUserLocation()
+  } catch (error) {
+    console.error("[v0] Error fetching WhatsApp photo:", error)
+    // Use fallback photo on error
+    setWhatsappPhoto(fallbackPhoto)
+    fetchUserLocation()
+  } finally {
+    setIsLoadingPhoto(false)
   }
+}
 
   const fetchUserLocation = async () => {
     setIsLoadingLocation(true)
