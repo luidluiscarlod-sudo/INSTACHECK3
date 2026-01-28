@@ -212,14 +212,19 @@ function SpySystemContent() {
   ]
 
   // Check for search limit on mount
+  // TEMPORARILY DISABLED FOR TESTING - uncomment to enable limit
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const existingLimit = getSearchLimitData()
-      if (existingLimit) {
-        console.log("[v0] Search limit found:", existingLimit)
-        setLimitData(existingLimit)
-        setShowLimitReached(true)
-      }
+      // Clear old limit for testing
+      localStorage.removeItem("instacheck_search_limit")
+      console.log("[v0] Limit cleared for testing")
+      
+      // const existingLimit = getSearchLimitData()
+      // if (existingLimit) {
+      //   console.log("[v0] Search limit found:", existingLimit)
+      //   setLimitData(existingLimit)
+      //   setShowLimitReached(true)
+      // }
     }
   }, [])
 
@@ -509,47 +514,59 @@ if (progress >= 100) {
   }, intervalDuration)
   }, [nextStage, investigatedPhone, investigatedHandle, instagramProfile])
 
-  const fetchWhatsAppPhoto = async (phoneNumber: string, countryCode: string) => {
-    console.log("[v0] fetchWhatsAppPhoto called with:", { phoneNumber, countryCode })
+const fetchWhatsAppPhoto = async (phoneNumber: string, countryCode: string) => {
+  console.log("[v0] fetchWhatsAppPhoto called with:", { phoneNumber, countryCode })
 
-    if (!phoneNumber || phoneNumber.length < 8) {
-      console.log("[v0] Phone number too short, aborting")
-      return
-    }
-
-    setIsLoadingPhoto(true)
-    console.log("[v0] Starting WhatsApp photo fetch...")
-
-    try {
-      const response = await fetch("/api/whatsapp-photo", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          phone: phoneNumber,
-          countryCode: countryCode,
-        }),
-      })
-
-      console.log("[v0] WhatsApp API response status:", response.status)
-      const data = await response.json()
-      console.log("[v0] WhatsApp API response data:", data)
-
-      if (data.success && data.result) {
-        console.log("[v0] Setting WhatsApp photo:", data.result)
-        setWhatsappPhoto(data.result)
-        fetchUserLocation()
-      } else {
-        console.log("[v0] WhatsApp API returned no photo")
-      }
-    } catch (error) {
-      console.error("[v0] Error fetching WhatsApp photo:", error)
-    } finally {
-      setIsLoadingPhoto(false)
-      console.log("[v0] WhatsApp photo fetch completed")
-    }
+  if (!phoneNumber || phoneNumber.length < 8) {
+    console.log("[v0] Phone number too short, aborting")
+    return
   }
+
+  setIsLoadingPhoto(true)
+  
+  // Fallback photo
+  const fallbackPhoto = "https://i.postimg.cc/gcNd6QBM/img1.jpg"
+
+  try {
+    // Add timeout with AbortController
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 8000) // 8 second timeout
+
+    const response = await fetch("/api/whatsapp-photo", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        phone: phoneNumber,
+        countryCode: countryCode,
+      }),
+      signal: controller.signal,
+    })
+
+    clearTimeout(timeoutId)
+
+    console.log("[v0] WhatsApp API response status:", response.status)
+    const data = await response.json()
+    console.log("[v0] WhatsApp API response data:", data)
+
+    if (data.success && data.result) {
+      console.log("[v0] Setting WhatsApp photo:", data.result)
+      setWhatsappPhoto(data.result)
+    } else {
+      console.log("[v0] WhatsApp API returned no photo, using fallback")
+      setWhatsappPhoto(fallbackPhoto)
+    }
+    fetchUserLocation()
+  } catch (error) {
+    console.error("[v0] Error fetching WhatsApp photo:", error)
+    // Use fallback photo on error
+    setWhatsappPhoto(fallbackPhoto)
+    fetchUserLocation()
+  } finally {
+    setIsLoadingPhoto(false)
+  }
+}
 
   const fetchUserLocation = async () => {
     setIsLoadingLocation(true)
