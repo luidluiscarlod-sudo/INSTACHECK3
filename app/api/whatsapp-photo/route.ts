@@ -51,15 +51,15 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const apiUrl = https://whatsapp-data.p.rapidapi.com//bizname?phone=${fullPhone}
+    const apiUrl = `https://whatsapp-data1.p.rapidapi.com/number/${fullPhone}`
 
     let response: Response
     try {
       response = await fetch(apiUrl, {
         method: "GET",
         headers: {
-          "x-rapidapi-key":"42865ce77amsh6b3ec8ac168e4c3p1ae1b6jsndc1ea20ce2d0" ,
-          "x-rapidapi-host": "https://whatsapp-data.p.rapidapi.com.com/",
+          "x-rapidapi-key": "f575549d03mshca86c44dcf4b8b2p15d5ecjsn85e5e31470a0",
+          "x-rapidapi-host": "whatsapp-data1.p.rapidapi.com",
         },
       })
     } catch (fetchError) {
