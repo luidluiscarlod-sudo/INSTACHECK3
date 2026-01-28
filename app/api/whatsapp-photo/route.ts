@@ -58,8 +58,8 @@ export async function POST(request: NextRequest) {
       response = await fetch(apiUrl, {
         method: "GET",
         headers: {
-          "x-rapidapi-key": "f575549d03mshca86c44dcf4b8b2p15d5ecjsn85e5e31470a0 97a7921956mshc2ffff7f5f27dfcp1d62c3jsn8d885b30dda2",
-          "x-rapidapi-host": "https://whatsapp-data1.p.rapidapi.com/",
+          "x-rapidapi-key": "42865ce77amsh6b3ec8ac168e4c3p1ae1b6jsndc1ea20ce2d0",
+          "x-rapidapi-host": "whatsapp-data.p.rapidapi.com",
         },
       })
     } catch (fetchError) {
