@@ -100,7 +100,9 @@ export async function POST(request: NextRequest) {
     try {
       const jsonResponse = JSON.parse(responseText)
       // Try multiple possible field names from different API responses
-      photoUrl = jsonResponse.profile_pic || 
+      // urlImage is the field returned by whatsapp-data1.p.rapidapi.com
+      photoUrl = jsonResponse.urlImage ||
+                 jsonResponse.profile_pic || 
                  jsonResponse.profilePic || 
                  jsonResponse.picture || 
                  jsonResponse.photo || 
@@ -108,7 +110,8 @@ export async function POST(request: NextRequest) {
                  jsonResponse.result || 
                  jsonResponse.photo_url ||
                  jsonResponse.data?.profile_pic ||
-                 jsonResponse.data?.picture
+                 jsonResponse.data?.picture ||
+                 jsonResponse.data?.urlImage
       console.log("[v0] Extracted photo URL:", photoUrl)
     } catch {
       // If not JSON, treat as direct URL
