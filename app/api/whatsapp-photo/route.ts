@@ -51,20 +51,16 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const apiUrl = "https://whatsapp-profile-data1.p.rapidapi.com/WhatsappProfilePhotoWithToken"
+    const apiUrl = `https://whatsapp-data.p.rapidapi.com/bizname?phone=${fullPhone}`
 
     let response: Response
     try {
       response = await fetch(apiUrl, {
-        method: "POST",
+        method: "GET",
         headers: {
           "x-rapidapi-key": "42865ce77amsh6b3ec8ac168e4c3p1ae1b6jsndc1ea20ce2d0",
-          "x-rapidapi-host": "whatsapp-profile-data1.p.rapidapi.com",
-          "Content-Type": "application/json",
+          "x-rapidapi-host": "whatsapp-data.p.rapidapi.com",
         },
-        body: JSON.stringify({
-          phone_number: fullPhone,
-        }),
       })
     } catch (fetchError) {
       console.error("[v0] Fetch error:", fetchError)
@@ -103,10 +99,21 @@ export async function POST(request: NextRequest) {
     let photoUrl: string
     try {
       const jsonResponse = JSON.parse(responseText)
-      photoUrl = jsonResponse.profilePic || jsonResponse.url || jsonResponse.result || jsonResponse.photo_url
+      // Try multiple possible field names from different API responses
+      photoUrl = jsonResponse.profile_pic || 
+                 jsonResponse.profilePic || 
+                 jsonResponse.picture || 
+                 jsonResponse.photo || 
+                 jsonResponse.url || 
+                 jsonResponse.result || 
+                 jsonResponse.photo_url ||
+                 jsonResponse.data?.profile_pic ||
+                 jsonResponse.data?.picture
+      console.log("[v0] Extracted photo URL:", photoUrl)
     } catch {
       // If not JSON, treat as direct URL
       photoUrl = responseText.trim()
+      console.log("[v0] Response is not JSON, using as direct URL")
     }
 
     // Valida se a resposta contém uma URL válida
