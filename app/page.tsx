@@ -1088,6 +1088,27 @@ case 2: // OLD STAGE 1: Upload and Handle
               )}
             </div>
 
+            {/* Loading Modal */}
+            {isLoadingInstagram && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+                <div className="bg-gray-900 border border-gray-700 rounded-2xl p-8 max-w-sm w-full mx-4 text-center space-y-5 shadow-2xl">
+                  <div className="flex justify-center">
+                    <div className="relative">
+                      <div className="animate-spin rounded-full h-16 w-16 border-4 border-gray-700 border-t-pink-500"></div>
+                      <ScanEye className="absolute inset-0 m-auto text-pink-500" size={28} />
+                    </div>
+                  </div>
+                  <h3 className="text-xl font-bold text-white">Searching profile...</h3>
+                  <p className="text-sm text-gray-400">Accessing Instagram databases to retrieve profile information and photos.</p>
+                  <div className="flex items-center justify-center gap-1">
+                    <div className="w-2 h-2 rounded-full bg-pink-500 animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                    <div className="w-2 h-2 rounded-full bg-pink-500 animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                    <div className="w-2 h-2 rounded-full bg-pink-500 animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {instagramProfile && !isLoadingInstagram && (
               <div className="mt-4 p-4 bg-green-900/30 border border-green-700 rounded-lg max-w-md mx-auto animate-fade-in">
                 <div className="flex items-start space-x-3">
@@ -1239,10 +1260,10 @@ case 2: // OLD STAGE 1: Upload and Handle
 
             <Button
               onClick={startAnalysis}
-              disabled={!fileName || !investigatedHandle || isAnalyzing} // Disable until file AND handle are present
+              disabled={!fileName || !investigatedHandle || !instagramProfile || isLoadingInstagram || isAnalyzing}
               className="mt-10 px-10 py-5 text-xl font-bold uppercase bg-gradient-to-r from-pink-500 to-red-600 text-white shadow-lg hover:from-pink-600 hover:to-red-700 transition-all duration-300 transform hover:scale-105 animate-pulse-slow disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isAnalyzing ? "ANALYZING..." : "➡️ CONTINUE"}
+              {isAnalyzing ? "ANALYZING..." : isLoadingInstagram ? "LOADING PROFILE..." : "CONTINUE"}
             </Button>
           </div>
         )
