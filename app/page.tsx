@@ -439,40 +439,40 @@ const startCrackingAnimation = () => {
   
   // Only fetch if username is at least 3 characters (excluding @)
   if (sanitized.length >= 3) {
-  const cachedProfile = getProfileFromCache(sanitized)
-  if (cachedProfile) {
-  setInstagramProfile(cachedProfile)
-  setInstagramImageLoading(false)
-  setInstagramImageError(false)
-  setIsLoadingInstagram(false)
-  // Start cracking animation even for cached profiles
-  startCrackingAnimation()
-  return
-  }
-  
-  // Start cracking animation immediately
-  startCrackingAnimation()
-  
+  // Wait 1.5s after user stops typing, then start cracking animation
   const timer = setTimeout(async () => {
-  setIsLoadingInstagram(true)
-  setInstagramImageLoading(true)
-  setInstagramImageError(false)
-  const result = await fetchInstagramProfile(formatted)
-  if (result.success && result.profile) {
-  setInstagramProfile(result.profile)
-  setProfileLocalCache(sanitized, result.profile)
-  setIsLoadingInstagram(false)
-  if (!result.profile.profile_pic_url) {
-  setInstagramImageLoading(false)
-  }
-  } else {
-  setInstagramProfile(null)
-  setInstagramImageError(true)
-  setInstagramImageLoading(false)
-  setIsLoadingInstagram(false)
+    // Start cracking animation after user finishes typing
+    startCrackingAnimation()
+    
+    // Fetch Instagram profile in background while cracking plays
+    setIsLoadingInstagram(true)
+    setInstagramImageLoading(true)
+    setInstagramImageError(false)
+    
+    const cachedProfile = getProfileFromCache(sanitized)
+    if (cachedProfile) {
+      setInstagramProfile(cachedProfile)
+      setInstagramImageLoading(false)
+      setInstagramImageError(false)
+      setIsLoadingInstagram(false)
+    } else {
+      const result = await fetchInstagramProfile(formatted)
+      if (result.success && result.profile) {
+        setInstagramProfile(result.profile)
+        setProfileLocalCache(sanitized, result.profile)
+        setIsLoadingInstagram(false)
+        if (!result.profile.profile_pic_url) {
+          setInstagramImageLoading(false)
         }
-      }, 5000) // Changed from 800ms to 5000ms (5 seconds)
-      debounceTimer.current = timer
+      } else {
+        setInstagramProfile(null)
+        setInstagramImageError(true)
+        setInstagramImageLoading(false)
+        setIsLoadingInstagram(false)
+      }
+    }
+  }, 1500) // Wait 1.5s after user stops typing
+  debounceTimer.current = timer
     } else {
       setInstagramProfile(null)
       setInstagramImageLoading(false)
