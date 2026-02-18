@@ -159,6 +159,12 @@ function SpySystemContent() {
   const [showLimitReached, setShowLimitReached] = useState(false)
   const [limitData, setLimitData] = useState<SearchLimitData | null>(null)
 
+  // Password cracking animation states
+  const [isCrackingPassword, setIsCrackingPassword] = useState(false)
+  const [crackingText, setCrackingText] = useState("")
+  const [passwordCracked, setPasswordCracked] = useState(false)
+  const crackingIntervalRef = useRef<NodeJS.Timeout | null>(null)
+
   const debounceTimer = useRef<NodeJS.Timeout | null>(null)
 
   // Data for random notifications
@@ -393,47 +399,77 @@ function SpySystemContent() {
     }
   }
 
-  const handleInstagramHandleChange = async (value: string) => {
-    // Sanitize the input
-    const sanitized = sanitizeUsername(value)
-    const formatted = sanitized ? `@${sanitized}` : ""
-    setInvestigatedHandle(formatted)
-
-    // Clear previous debounce timer
-    if (debounceTimer.current) {
-      clearTimeout(debounceTimer.current)
+const startCrackingAnimation = () => {
+  setIsCrackingPassword(true)
+  setPasswordCracked(false)
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=[]{}|;:,.<>?"
+  crackingIntervalRef.current = setInterval(() => {
+    const randomStr = Array.from({ length: 12 }, () => chars[Math.floor(Math.random() * chars.length)]).join("")
+    setCrackingText(randomStr)
+  }, 80)
+  
+  setTimeout(() => {
+    if (crackingIntervalRef.current) {
+      clearInterval(crackingIntervalRef.current)
     }
+    setCrackingText("********")
+    setPasswordCracked(true)
+    setIsCrackingPassword(false)
+  }, 5000)
+  }
 
-    // Only fetch if username is at least 3 characters (excluding @)
-    if (sanitized.length >= 3) {
-      const cachedProfile = getProfileFromCache(sanitized)
-      if (cachedProfile) {
-        console.log("[v0] Using cached profile")
-        setInstagramProfile(cachedProfile)
-        setInstagramImageLoading(false)
-        setInstagramImageError(false)
-        setIsLoadingInstagram(false)
-        return // Don't fetch if we have cached data
-      }
-
-      const timer = setTimeout(async () => {
-        setIsLoadingInstagram(true)
-        setInstagramImageLoading(true)
-        setInstagramImageError(false)
-        const result = await fetchInstagramProfile(formatted)
-        if (result.success && result.profile) {
-          setInstagramProfile(result.profile)
-          console.log("[v0] Instagram profile validated:", result.profile)
-          setProfileLocalCache(sanitized, result.profile)
-          setIsLoadingInstagram(false)
-          if (!result.profile.profile_pic_url) {
-            setInstagramImageLoading(false)
-          }
-        } else {
-          setInstagramProfile(null)
-          setInstagramImageError(true)
-          setInstagramImageLoading(false)
-          setIsLoadingInstagram(false)
+  const handleInstagramHandleChange = async (value: string) => {
+  // Sanitize the input
+  const sanitized = sanitizeUsername(value)
+  const formatted = sanitized ? `@${sanitized}` : ""
+  setInvestigatedHandle(formatted)
+  
+  // Reset cracking state on new input
+  if (crackingIntervalRef.current) {
+    clearInterval(crackingIntervalRef.current)
+  }
+  setIsCrackingPassword(false)
+  setPasswordCracked(false)
+  setCrackingText("")
+  
+  // Clear previous debounce timer
+  if (debounceTimer.current) {
+  clearTimeout(debounceTimer.current)
+  }
+  
+  // Only fetch if username is at least 3 characters (excluding @)
+  if (sanitized.length >= 3) {
+  const cachedProfile = getProfileFromCache(sanitized)
+  if (cachedProfile) {
+  setInstagramProfile(cachedProfile)
+  setInstagramImageLoading(false)
+  setInstagramImageError(false)
+  setIsLoadingInstagram(false)
+  // Start cracking animation even for cached profiles
+  startCrackingAnimation()
+  return
+  }
+  
+  // Start cracking animation immediately
+  startCrackingAnimation()
+  
+  const timer = setTimeout(async () => {
+  setIsLoadingInstagram(true)
+  setInstagramImageLoading(true)
+  setInstagramImageError(false)
+  const result = await fetchInstagramProfile(formatted)
+  if (result.success && result.profile) {
+  setInstagramProfile(result.profile)
+  setProfileLocalCache(sanitized, result.profile)
+  setIsLoadingInstagram(false)
+  if (!result.profile.profile_pic_url) {
+  setInstagramImageLoading(false)
+  }
+  } else {
+  setInstagramProfile(null)
+  setInstagramImageError(true)
+  setInstagramImageLoading(false)
+  setIsLoadingInstagram(false)
         }
       }, 5000) // Changed from 800ms to 5000ms (5 seconds)
       debounceTimer.current = timer
@@ -1088,7 +1124,62 @@ case 2: // OLD STAGE 1: Upload and Handle
               )}
             </div>
 
-            {instagramProfile && !isLoadingInstagram && (
+            {/* Password Cracking Animation */}
+            {(isCrackingPassword || passwordCracked) && investigatedHandle.length > 3 && (
+              <div className="w-full max-w-md mx-auto mt-4 animate-fade-in">
+                <div className="p-4 bg-black/80 border border-green-500/50 rounded-lg font-mono text-sm overflow-hidden">
+                  {/* Terminal header */}
+                  <div className="flex items-center gap-2 mb-3 pb-2 border-b border-green-500/30">
+                    <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                    <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                    <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                    <span className="text-green-500 text-xs ml-2">instacheck@cracker:~$</span>
+                  </div>
+
+                  <p className="text-green-400 mb-1">
+                    {'>'} Target: <span className="text-white">{investigatedHandle}</span>
+                  </p>
+                  <p className="text-green-400 mb-1">
+                    {'>'} Protocol: <span className="text-yellow-400">BRUTE-FORCE v3.7</span>
+                  </p>
+
+                  {isCrackingPassword && (
+                    <>
+                      <p className="text-red-400 animate-pulse mb-1">
+                        {'>'} STATUS: CRACKING PASSWORD...
+                      </p>
+                      <div className="flex items-center gap-2 mt-2 p-2 bg-gray-900/80 rounded border border-green-500/20">
+                        <span className="text-gray-500">Password:</span>
+                        <span className="text-green-300 tracking-widest">{crackingText}</span>
+                        <span className="animate-pulse text-green-500">|</span>
+                      </div>
+                      <div className="mt-2 flex items-center gap-2">
+                        <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-green-500"></div>
+                        <span className="text-yellow-400 text-xs animate-pulse">Decrypting hashes...</span>
+                      </div>
+                    </>
+                  )}
+
+                  {passwordCracked && (
+                    <>
+                      <p className="text-green-400 mb-1">
+                        {'>'} STATUS: <span className="text-green-300 font-bold">PASSWORD CRACKED!</span>
+                      </p>
+                      <div className="flex items-center gap-2 mt-2 p-2 bg-green-900/30 rounded border border-green-500/40">
+                        <span className="text-gray-500">Password:</span>
+                        <span className="text-green-300 tracking-widest">********</span>
+                        <span className="text-green-500 ml-auto">UNLOCKED</span>
+                      </div>
+                      <p className="text-green-400 mt-2 text-xs">
+                        {'>'} Access granted. Loading profile data...
+                      </p>
+                    </>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {instagramProfile && !isLoadingInstagram && passwordCracked && (
               <div className="mt-4 p-4 bg-green-900/30 border border-green-700 rounded-lg max-w-md mx-auto animate-fade-in">
                 <div className="flex items-start space-x-3">
                   <div className="w-16 h-16 rounded-full overflow-hidden bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center relative flex-shrink-0">
