@@ -1,51 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
 
-// Different header configurations to try
-const headerConfigs = [
-  {
-    "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1",
-    "Accept": "image/webp,image/apng,image/*,*/*;q=0.8",
-    "Accept-Language": "en-US,en;q=0.9",
-    "Sec-Fetch-Dest": "image",
-    "Sec-Fetch-Mode": "no-cors",
-    "Sec-Fetch-Site": "cross-site",
-  },
-  {
-    "User-Agent": "Instagram 275.0.0.27.98 Android (33/13; 420dpi; 1080x2400; samsung; SM-G991B; o1s; exynos2100)",
-    "Accept": "*/*",
-    "Accept-Language": "en-US",
-  },
-  {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-    "Accept": "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
-    "Accept-Language": "en-US,en;q=0.9",
-    "Referer": "https://www.instagram.com/",
-    "Origin": "https://www.instagram.com",
-  },
-]
-
-async function tryFetchImage(imageUrl: string, headers: Record<string, string>, timeout: number = 5000): Promise<Response | null> {
-  const controller = new AbortController()
-  const timeoutId = setTimeout(() => controller.abort(), timeout)
-  
-  try {
-    const response = await fetch(imageUrl, {
-      headers,
-      signal: controller.signal,
-      cache: "no-store",
-    })
-    clearTimeout(timeoutId)
-    
-    if (response.ok) {
-      return response
-    }
-    return null
-  } catch {
-    clearTimeout(timeoutId)
-    return null
-  }
-}
-
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
@@ -55,46 +9,55 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Image URL is required" }, { status: 400 })
     }
 
-    console.log("[v0] Proxying Instagram image:", imageUrl.substring(0, 80) + "...")
+    console.log("[v0] Proxying Instagram image:", imageUrl.substring(0, 100) + "...")
 
-    // Try each header configuration
-    for (let i = 0; i < headerConfigs.length; i++) {
-      const response = await tryFetchImage(imageUrl, headerConfigs[i])
-      
-      if (response) {
-        const imageBuffer = await response.arrayBuffer()
-        const contentType = response.headers.get("content-type") || "image/jpeg"
-        
-        console.log("[v0] Successfully proxied image with config", i, "size:", imageBuffer.byteLength)
-        
-        return new NextResponse(imageBuffer, {
-          status: 200,
-          headers: {
-            "Content-Type": contentType,
-            "Cache-Control": "public, max-age=86400, immutable",
-            "Access-Control-Allow-Origin": "*",
-          },
-        })
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 10000) // 10 second timeout
+
+    try {
+      // Fetch the image from Instagram with timeout
+      const response = await fetch(imageUrl, {
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+          Referer: "https://www.instagram.com/",
+          Accept: "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
+          "Accept-Language": "en-US,en;q=0.9",
+          "Cache-Control": "no-cache",
+          Pragma: "no-cache",
+        },
+        signal: controller.signal,
+      })
+
+      clearTimeout(timeoutId)
+
+      if (!response.ok) {
+        console.error("[v0] Failed to fetch Instagram image:", response.status, response.statusText)
+        return NextResponse.json({ error: "Failed to fetch image" }, { status: response.status })
       }
-    }
 
-    // All attempts failed - return a placeholder or transparent pixel
-    console.error("[v0] All attempts to fetch Instagram image failed")
-    
-    // Return a 1x1 transparent PNG as fallback
-    const transparentPixel = Buffer.from(
-      "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
-      "base64"
-    )
-    
-    return new NextResponse(transparentPixel, {
-      status: 200,
-      headers: {
-        "Content-Type": "image/png",
-        "Cache-Control": "no-cache",
-        "Access-Control-Allow-Origin": "*",
-      },
-    })
+      const imageBuffer = await response.arrayBuffer()
+      const contentType = response.headers.get("content-type") || "image/jpeg"
+
+      console.log("[v0] Successfully proxied Instagram image, size:", imageBuffer.byteLength, "bytes")
+
+      // Return the image with proper headers
+      return new NextResponse(imageBuffer, {
+        status: 200,
+        headers: {
+          "Content-Type": contentType,
+          "Cache-Control": "public, max-age=86400, immutable", // Cache for 24 hours
+          "Access-Control-Allow-Origin": "*",
+        },
+      })
+    } catch (fetchError: any) {
+      clearTimeout(timeoutId)
+      if (fetchError.name === "AbortError") {
+        console.error("[v0] Instagram image fetch timeout")
+        return NextResponse.json({ error: "Request timeout" }, { status: 504 })
+      }
+      throw fetchError
+    }
   } catch (error: any) {
     console.error("[v0] Error proxying Instagram image:", error.message || error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
