@@ -2299,7 +2299,7 @@ case 5: // OLD STAGE 3: Revelation - Platform Detection
     onClick={nextStage}
     className="mt-6 px-10 py-5 text-xl font-bold uppercase bg-gradient-to-r from-red-600 to-red-800 text-white shadow-lg hover:from-red-700 hover:to-gray-900 transition-all duration-300 transform hover:scale-105 animate-pulse-slow"
   >
-    VER MAIS DETALHES
+    VIEW MORE DETAILS
   </Button>
 </div>
         )
