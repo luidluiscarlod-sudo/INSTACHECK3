@@ -1189,36 +1189,20 @@ case 2: // OLD STAGE 1: Upload and Handle
                   <div className="w-16 h-16 rounded-full overflow-hidden bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center relative flex-shrink-0">
                     {instagramImageLoading ? (
                       <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
-                    ) : instagramProfile.profile_pic_url && !instagramImageError ? (
-                      <>
-                        <img
-                          src={
-                            instagramImageError
-                              ? instagramProfile.profile_pic_url
-                              : `/api/instagram-image-proxy?url=${encodeURIComponent(instagramProfile.profile_pic_url)}`
-                          }
-                          alt={instagramProfile.username}
-                          className="w-full h-full object-cover"
-                          loading="eager"
-                          crossOrigin="anonymous"
-                          onLoad={() => {
-                            console.log("[v0] Profile picture loaded successfully")
-                            setInstagramImageLoading(false)
-                            setInstagramImageError(false)
-                          }}
-                          onError={(e) => {
-                            console.log("[v0] Trying fallback image source")
-                            if (!instagramImageError) {
-                              // Tenta carregar direto da URL
-                              setInstagramImageError(true)
-                              const img = e.target as HTMLImageElement
-                              img.src = instagramProfile.profile_pic_url
-                            } else {
-                              setInstagramImageLoading(false)
-                            }
-                          }}
-                        />
-                      </>
+                    ) : instagramProfile.profile_pic_url ? (
+                      <img
+                        src={instagramProfile.profile_pic_url}
+                        alt={instagramProfile.username}
+                        className="w-full h-full object-cover"
+                        loading="eager"
+                        referrerPolicy="no-referrer"
+                        onLoad={() => {
+                          setInstagramImageLoading(false)
+                        }}
+                        onError={() => {
+                          setInstagramImageLoading(false)
+                        }}
+                      />
                     ) : (
                       <Camera className="text-white" size={24} />
                     )}
@@ -1458,14 +1442,10 @@ case 3: // OLD STAGE 2: Detection and Notifications
                 {/* Notification 3: Is typing... */}
                 <div className="flex items-center gap-3 p-3 bg-gray-800/40 rounded-lg border border-gray-700 animate-fade-in-delay-7">
                   <img
-                    src={
-                      instagramProfile?.profile_pic_url
-                        ? `/api/instagram-image-proxy?url=${encodeURIComponent(instagramProfile.profile_pic_url)}`
-                        : imagePreviewUrl || "/placeholder.svg"
-                    }
+                    src={instagramProfile?.profile_pic_url || imagePreviewUrl || "/placeholder.svg"}
                     alt="User Avatar"
                     className="w-10 h-10 rounded-full object-cover border-2 border-gray-500"
-                    crossOrigin="anonymous"
+                    referrerPolicy="no-referrer"
                   />
                   <div>
                     <p className="text-sm text-white font-bold">
@@ -1480,14 +1460,10 @@ case 3: // OLD STAGE 2: Detection and Notifications
                 {/* Notification 4: Message received after typing (simulating "digita de novo") */}
                 <div className="flex items-center gap-3 p-3 bg-gray-800/40 rounded-lg border border-gray-700 animate-fade-in-delay-8">
                   <img
-                    src={
-                      instagramProfile?.profile_pic_url
-                        ? `/api/instagram-image-proxy?url=${encodeURIComponent(instagramProfile.profile_pic_url)}`
-                        : imagePreviewUrl || "/placeholder.svg"
-                    }
+                    src={instagramProfile?.profile_pic_url || imagePreviewUrl || "/placeholder.svg"}
                     alt="User Avatar"
                     className="w-10 h-10 rounded-full object-cover border-2 border-blue-500"
-                    crossOrigin="anonymous"
+                    referrerPolicy="no-referrer"
                   />
                   <div>
                     <p className="text-sm text-white font-bold">
@@ -1529,13 +1505,11 @@ case 3: // OLD STAGE 2: Detection and Notifications
                     <div className="flex items-center gap-2 mt-2">
                       <img
                         src={
-                          instagramProfile?.profile_pic_url
-                            ? `/api/instagram-image-proxy?url=${encodeURIComponent(instagramProfile.profile_pic_url)}`
-                            : imagePreviewUrl || "/placeholder.svg"
+                          instagramProfile?.profile_pic_url || imagePreviewUrl || "/placeholder.svg"
                         }
                         alt="User Avatar"
                         className="w-8 h-8 rounded-full object-cover border border-gray-500"
-                        crossOrigin="anonymous"
+                        referrerPolicy="no-referrer"
                       />
                       <div>
                         <p className="text-sm text-gray-300 font-bold">{investigatedHandle || "@alvo"}</p>
@@ -1563,13 +1537,11 @@ case 3: // OLD STAGE 2: Detection and Notifications
                     <div className="flex items-center gap-2 mt-2">
                       <img
                         src={
-                          instagramProfile?.profile_pic_url
-                            ? `/api/instagram-image-proxy?url=${encodeURIComponent(instagramProfile.profile_pic_url)}`
-                            : imagePreviewUrl || "/placeholder.svg"
+                          instagramProfile?.profile_pic_url || imagePreviewUrl || "/placeholder.svg"
                         }
                         alt="User Avatar"
                         className="w-8 h-8 rounded-full object-cover border border-gray-500"
-                        crossOrigin="anonymous"
+                        referrerPolicy="no-referrer"
                       />
                       <div>
                         <p className="text-sm text-gray-300 font-bold">{investigatedHandle || "@alvo"}</p>
@@ -1597,13 +1569,11 @@ case 3: // OLD STAGE 2: Detection and Notifications
                     <div className="flex items-center gap-2 mt-2">
                       <img
                         src={
-                          instagramProfile?.profile_pic_url
-                            ? `/api/instagram-image-proxy?url=${encodeURIComponent(instagramProfile.profile_pic_url)}`
-                            : imagePreviewUrl || "/placeholder.svg"
+                          instagramProfile?.profile_pic_url || imagePreviewUrl || "/placeholder.svg"
                         }
                         alt="User Avatar"
                         className="w-8 h-8 rounded-full object-cover border border-gray-500"
-                        crossOrigin="anonymous"
+                        referrerPolicy="no-referrer"
                       />
                       <div>
                         <p className="text-sm text-gray-300 font-bold">{investigatedHandle || "@alvo"}</p>
@@ -1633,13 +1603,11 @@ case 3: // OLD STAGE 2: Detection and Notifications
                     <div className="flex items-center gap-2 mt-2">
                       <img
                         src={
-                          instagramProfile?.profile_pic_url
-                            ? `/api/instagram-image-proxy?url=${encodeURIComponent(instagramProfile.profile_pic_url)}`
-                            : imagePreviewUrl || "/placeholder.svg"
+                          instagramProfile?.profile_pic_url || imagePreviewUrl || "/placeholder.svg"
                         }
                         alt="User Avatar"
                         className="w-8 h-8 rounded-full object-cover border border-gray-500"
-                        crossOrigin="anonymous"
+                        referrerPolicy="no-referrer"
                       />
                       <div>
                         <p className="text-sm text-gray-300 font-bold">{investigatedHandle || "@alvo"}</p>
@@ -1670,13 +1638,11 @@ case 3: // OLD STAGE 2: Detection and Notifications
                     <div className="flex items-center gap-2 mt-2">
                       <img
                         src={
-                          instagramProfile?.profile_pic_url
-                            ? `/api/instagram-image-proxy?url=${encodeURIComponent(instagramProfile.profile_pic_url)}`
-                            : imagePreviewUrl || "/placeholder.svg"
+                          instagramProfile?.profile_pic_url || imagePreviewUrl || "/placeholder.svg"
                         }
                         alt="User Avatar"
                         className="w-8 h-8 rounded-full object-cover border border-gray-500"
-                        crossOrigin="anonymous"
+                        referrerPolicy="no-referrer"
                       />
                       <div>
                         <p className="text-sm text-gray-300 font-bold">{investigatedHandle || "@alvo"}</p>
@@ -1704,13 +1670,11 @@ case 3: // OLD STAGE 2: Detection and Notifications
                     <div className="flex items-center gap-2 mt-2">
                       <img
                         src={
-                          instagramProfile?.profile_pic_url
-                            ? `/api/instagram-image-proxy?url=${encodeURIComponent(instagramProfile.profile_pic_url)}`
-                            : imagePreviewUrl || "/placeholder.svg"
+                          instagramProfile?.profile_pic_url || imagePreviewUrl || "/placeholder.svg"
                         }
                         alt="User Avatar"
                         className="w-8 h-8 rounded-full object-cover border border-gray-500"
-                        crossOrigin="anonymous"
+                        referrerPolicy="no-referrer"
                       />
                       <div>
                         <p className="text-sm text-gray-300 font-bold">{investigatedHandle || "@alvo"}</p>
@@ -1737,13 +1701,11 @@ case 3: // OLD STAGE 2: Detection and Notifications
                     <div className="flex items-center gap-2 mt-2">
                       <img
                         src={
-                          instagramProfile?.profile_pic_url
-                            ? `/api/instagram-image-proxy?url=${encodeURIComponent(instagramProfile.profile_pic_url)}`
-                            : imagePreviewUrl || "/placeholder.svg"
+                          instagramProfile?.profile_pic_url || imagePreviewUrl || "/placeholder.svg"
                         }
                         alt="User Avatar"
                         className="w-8 h-8 rounded-full object-cover border border-gray-500"
-                        crossOrigin="anonymous"
+                        referrerPolicy="no-referrer"
                       />
                       <div>
                         <p className="text-sm text-gray-300 font-bold">{investigatedHandle || "@alvo"}</p>
@@ -1771,13 +1733,11 @@ case 3: // OLD STAGE 2: Detection and Notifications
                     <div className="flex items-center gap-2 mt-2">
                       <img
                         src={
-                          instagramProfile?.profile_pic_url
-                            ? `/api/instagram-image-proxy?url=${encodeURIComponent(instagramProfile.profile_pic_url)}`
-                            : imagePreviewUrl || "/placeholder.svg"
+                          instagramProfile?.profile_pic_url || imagePreviewUrl || "/placeholder.svg"
                         }
                         alt="User Avatar"
                         className="w-8 h-8 rounded-full object-cover border border-gray-500"
-                        crossOrigin="anonymous"
+                        referrerPolicy="no-referrer"
                       />
                       <div>
                         <p className="text-sm text-gray-300 font-bold">{investigatedHandle || "@alvo"}</p>
@@ -1805,14 +1765,10 @@ case 4: // NEW STAGE: Tinder Likes Screen
               {/* Left: User Profile */}
               <div className="flex items-center gap-2 z-10">
                 <img
-                  src={
-                    instagramProfile?.profile_pic_url
-                      ? `/api/instagram-image-proxy?url=${encodeURIComponent(instagramProfile.profile_pic_url)}`
-                      : imagePreviewUrl || "/user-profile-illustration.png"
-                  }
+                  src={instagramProfile?.profile_pic_url || imagePreviewUrl || "/user-profile-illustration.png"}
                   alt="User Profile"
                   className="w-10 h-10 rounded-full object-cover border-2 border-red-500"
-                  crossOrigin="anonymous"
+                  referrerPolicy="no-referrer"
                 />
                 <span className="text-white font-bold text-lg truncate max-w-[120px]">
                   {investigatedHandle || "@your_profile"}
@@ -1840,14 +1796,10 @@ case 4: // NEW STAGE: Tinder Likes Screen
 
             <div className="flex items-center justify-center gap-3 p-4 bg-blue-600/80 text-white font-bold text-lg rounded-lg mx-auto mt-4 w-[90%] animate-fade-in flex-shrink-0">
               <img
-                src={
-                  instagramProfile?.profile_pic_url
-                    ? `/api/instagram-image-proxy?url=${encodeURIComponent(instagramProfile.profile_pic_url)}`
-                    : imagePreviewUrl || "/super-like-sender.jpg"
-                }
+src={instagramProfile?.profile_pic_url || imagePreviewUrl || "/super-like-sender.jpg"}
                 alt="Super Like Sender"
                 className="w-10 h-10 rounded-full object-cover border-2 border-yellow-300"
-                crossOrigin="anonymous"
+                referrerPolicy="no-referrer"
               />
               <span>You received a Super Like!</span>
               <Star size={24} className="text-yellow-300 fill-yellow-300" />
@@ -2382,7 +2334,8 @@ case 5: // OLD STAGE 3: Revelation - Platform Detection
                 <div className="w-full h-full rounded-full overflow-hidden bg-gray-800">
                   {limitData?.profilePicUrl ? (
                     <img
-                      src={`/api/instagram-image-proxy?url=${encodeURIComponent(limitData.profilePicUrl)}`}
+                      src={limitData.profilePicUrl}
+                        referrerPolicy="no-referrer"
                       alt="Profile"
                       className="w-full h-full object-cover"
                       onError={(e) => {
