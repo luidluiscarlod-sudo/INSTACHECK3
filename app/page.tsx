@@ -2206,14 +2206,14 @@ case 5: // OLD STAGE 3: Revelation - Platform Detection
   <div className="bg-red-600/20 border-2 border-red-500 rounded-lg p-4 animate-pulse mx-auto max-w-md">
     <div className="flex items-center justify-center gap-2">
       <AlertTriangle className="text-red-500" size={24} />
-      <span className="text-red-500 font-bold text-lg">PERFIL DETECTADO EM OUTRAS PLATAFORMAS</span>
+      <span className="text-red-500 font-bold text-lg">PROFILE DETECTED ON OTHER PLATFORMS</span>
       <AlertTriangle className="text-red-500" size={24} />
     </div>
   </div>
 
   {/* Platform Cards */}
   <div className="space-y-4 max-w-md mx-auto">
-    {/* Plataformas +18 Card */}
+    {/* +18 Platforms Card */}
     <div className="bg-gray-800/90 rounded-xl p-4 border border-gray-700">
       <div className="flex items-start gap-4">
         {/* User Photo Circle */}
@@ -2239,16 +2239,15 @@ case 5: // OLD STAGE 3: Revelation - Platform Detection
         {/* Content */}
         <div className="flex-1">
           <div className="flex items-center justify-between mb-2">
-            <h3 className="text-white font-bold text-lg">Plataformas +18</h3>
-            <span className="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full">BLOQUEADO</span>
+            <h3 className="text-white font-bold text-lg">+18 Platforms</h3>
           </div>
           <div className="flex items-center gap-2 text-yellow-400 mb-2">
             <AlertTriangle size={16} />
-            <span className="font-semibold">Possiveis perfis em:</span>
+            <span className="font-semibold">Possible profiles on:</span>
           </div>
           <ul className="text-gray-300 text-sm space-y-1">
             <li>• OnlyFans, Privacy</li>
-            <li>• Outras plataformas adultas</li>
+            <li>• Other adult platforms</li>
           </ul>
         </div>
       </div>
@@ -2286,7 +2285,7 @@ case 5: // OLD STAGE 3: Revelation - Platform Detection
             <h3 className="text-white font-bold text-lg">Telegram</h3>
           </div>
           <div className="mb-2">
-            <span className="border-2 border-yellow-500 text-yellow-500 text-xs font-bold px-3 py-1 rounded-full">PROVAVELMENTE E ELE</span>
+            <span className="border-2 border-yellow-500 text-yellow-500 text-xs font-bold px-3 py-1 rounded-full">PROBABLY HIM</span>
           </div>
           <div className="bg-gray-900 rounded-lg px-3 py-2 mt-2">
             <span className="text-gray-400 font-mono text-sm">t.me/us*******</span>
