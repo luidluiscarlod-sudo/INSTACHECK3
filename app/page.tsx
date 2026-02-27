@@ -2197,28 +2197,112 @@ case 4: // NEW STAGE: Tinder Likes Screen
             </Button>
           </div>
         )
-case 5: // OLD STAGE 3: Revelation
+case 5: // OLD STAGE 3: Revelation - Platform Detection
   return (
-  <div className="text-center space-y-8">
+  <div className="text-center space-y-6">
   <LimitWarningBanner />
-  <div className="grid gap-3 text-left max-w-xl mx-auto">
-  <p className="text-lg md:text-xl text-white animate-fade-in">
-  <span className="text-red-400 font-bold">ALERT:</span> Private messages with suggestive content.
-              </p>
-              <p className="text-lg md:text-xl text-white animate-fade-in-delay-1">
-                <span className="text-red-400 font-bold">ALERT:</span> Likes on unknown profiles' photos.
-              </p>
-              <p className="text-lg md:text-xl text-white animate-fade-in-delay-2">
-                <span className="text-red-400 font-bold">ALERT:</span> Old interactions recovered.
-              </p>
-            </div>
-            <Button
-              onClick={nextStage}
-              className="mt-10 px-10 py-5 text-xl font-bold uppercase bg-gradient-to-r from-red-600 to-red-800 text-white shadow-lg hover:from-red-700 hover:to-gray-900 transition-all duration-300 transform hover:scale-105 animate-pulse-slow"
-            >
-              ➡️ UNLOCK DETAILS
-            </Button>
+  
+  {/* Flashing Alert Banner */}
+  <div className="bg-red-600/20 border-2 border-red-500 rounded-lg p-4 animate-pulse mx-auto max-w-md">
+    <div className="flex items-center justify-center gap-2">
+      <AlertTriangle className="text-red-500" size={24} />
+      <span className="text-red-500 font-bold text-lg">PERFIL DETECTADO EM OUTRAS PLATAFORMAS</span>
+      <AlertTriangle className="text-red-500" size={24} />
+    </div>
+  </div>
+
+  {/* Platform Cards */}
+  <div className="space-y-4 max-w-md mx-auto">
+    {/* Plataformas +18 Card */}
+    <div className="bg-gray-800/90 rounded-xl p-4 border border-gray-700">
+      <div className="flex items-start gap-4">
+        {/* User Photo Circle */}
+        <div className="relative flex-shrink-0">
+          <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-gray-600">
+            {uploadedPhotoUrl ? (
+              <img 
+                src={uploadedPhotoUrl} 
+                alt="Detected" 
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full bg-gray-700 flex items-center justify-center">
+                <User className="text-gray-500" size={24} />
+              </div>
+            )}
           </div>
+          <div className="absolute -bottom-1 -right-1 bg-yellow-500 rounded-full p-1">
+            <Lock size={12} className="text-black" />
+          </div>
+        </div>
+        
+        {/* Content */}
+        <div className="flex-1">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-white font-bold text-lg">Plataformas +18</h3>
+            <span className="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full">BLOQUEADO</span>
+          </div>
+          <div className="flex items-center gap-2 text-yellow-400 mb-2">
+            <AlertTriangle size={16} />
+            <span className="font-semibold">Possiveis perfis em:</span>
+          </div>
+          <ul className="text-gray-300 text-sm space-y-1">
+            <li>• OnlyFans, Privacy</li>
+            <li>• Outras plataformas adultas</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    {/* Telegram Card */}
+    <div className="bg-gray-800/90 rounded-xl p-4 border border-gray-700">
+      <div className="flex items-start gap-4">
+        {/* User Photo Circle */}
+        <div className="relative flex-shrink-0">
+          <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-gray-600">
+            {uploadedPhotoUrl ? (
+              <img 
+                src={uploadedPhotoUrl} 
+                alt="Detected" 
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full bg-gray-700 flex items-center justify-center">
+                <User className="text-gray-500" size={24} />
+              </div>
+            )}
+          </div>
+          <div className="absolute -bottom-1 -right-1 bg-yellow-500 rounded-full p-1">
+            <Lock size={12} className="text-black" />
+          </div>
+        </div>
+        
+        {/* Content */}
+        <div className="flex-1">
+          <div className="flex items-center gap-2 mb-2">
+            <svg viewBox="0 0 24 24" className="w-6 h-6 text-blue-400" fill="currentColor">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/>
+            </svg>
+            <h3 className="text-white font-bold text-lg">Telegram</h3>
+          </div>
+          <div className="mb-2">
+            <span className="border-2 border-yellow-500 text-yellow-500 text-xs font-bold px-3 py-1 rounded-full">PROVAVELMENTE E ELE</span>
+          </div>
+          <div className="bg-gray-900 rounded-lg px-3 py-2 mt-2">
+            <span className="text-gray-400 font-mono text-sm">t.me/us*******</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <Button
+    onClick={nextStage}
+    className="mt-6 px-10 py-5 text-xl font-bold uppercase bg-gradient-to-r from-red-600 to-red-800 text-white shadow-lg hover:from-red-700 hover:to-gray-900 transition-all duration-300 transform hover:scale-105 animate-pulse-slow"
+  >
+    VER MAIS DETALHES
+  </Button>
+</div>
         )
       case 6: // OLD STAGE 4: Final CTA
         return (
