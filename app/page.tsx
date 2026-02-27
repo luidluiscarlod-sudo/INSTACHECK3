@@ -2219,9 +2219,9 @@ case 5: // OLD STAGE 3: Revelation - Platform Detection
         {/* User Photo Circle */}
         <div className="relative flex-shrink-0">
           <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-gray-600">
-            {uploadedPhotoUrl ? (
+            {imagePreviewUrl ? (
               <img 
-                src={uploadedPhotoUrl} 
+                src={imagePreviewUrl} 
                 alt="Detected" 
                 className="w-full h-full object-cover"
               />
@@ -2260,9 +2260,9 @@ case 5: // OLD STAGE 3: Revelation - Platform Detection
         {/* User Photo Circle */}
         <div className="relative flex-shrink-0">
           <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-gray-600">
-            {uploadedPhotoUrl ? (
+            {imagePreviewUrl ? (
               <img 
-                src={uploadedPhotoUrl} 
+                src={imagePreviewUrl} 
                 alt="Detected" 
                 className="w-full h-full object-cover"
               />
