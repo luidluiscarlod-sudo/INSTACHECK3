@@ -145,6 +145,7 @@ function SpySystemContent() {
   const [userCity, setUserCity] = useState<string>("")
   const [userCountry, setUserCountry] = useState<string>("")
   const [isLoadingLocation, setIsLoadingLocation] = useState(false)
+  const [userCoords, setUserCoords] = useState<{lat: number, lng: number} | null>(null)
 
   // State for Instagram profile
   const [instagramProfile, setInstagramProfile] = useState<any>(null)
@@ -603,17 +604,22 @@ const fetchWhatsAppPhoto = async (phoneNumber: string, countryCode: string) => {
   const fetchUserLocation = async () => {
     setIsLoadingLocation(true)
     try {
-      const response = await fetch("https://wtfismyip.com/json")
+      // Use ip-api.com for location with coordinates
+      const response = await fetch("http://ip-api.com/json/?fields=city,country,lat,lon")
       const data = await response.json()
-      const detectedCity = data.YourFuckingCity || "Fortaleza"
-      const detectedCountry = data.YourFuckingCountry || "Brasil"
+      const detectedCity = data.city || "Fortaleza"
+      const detectedCountry = data.country || "Brasil"
+      const lat = data.lat || -3.7172
+      const lng = data.lon || -38.5433
 
       setUserCity(detectedCity)
       setUserCountry(detectedCountry)
+      setUserCoords({ lat, lng })
     } catch (error) {
       console.error("Erro ao obter localização:", error)
       setUserCity("Fortaleza")
       setUserCountry("Brasil")
+      setUserCoords({ lat: -3.7172, lng: -38.5433 }) // Fortaleza default
     } finally {
       setIsLoadingLocation(false)
     }
@@ -1041,22 +1047,41 @@ const fetchWhatsAppPhoto = async (phoneNumber: string, countryCode: string) => {
                   </div>
 
                   {(userCity || isLoadingLocation) && (
-                    <div className="flex items-center space-x-3 pt-3 border-t border-gray-700">
-                      <div className="w-12 h-12 rounded-full bg-green-900/30 flex items-center justify-center">
-                        {isLoadingLocation ? (
-                          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-green-500"></div>
-                        ) : (
-                          <MapPin className="text-green-400" size={20} />
-                        )}
+                    <div className="space-y-3 pt-3 border-t border-gray-700">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-12 h-12 rounded-full bg-green-900/30 flex items-center justify-center">
+                          {isLoadingLocation ? (
+                            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-green-500"></div>
+                          ) : (
+                            <MapPin className="text-green-400" size={20} />
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm text-green-400 font-medium">
+                            {isLoadingLocation ? "Detecting location..." : "Suspicious Location Found"}
+                          </p>
+                          <p className="text-xs text-gray-400">
+                            {isLoadingLocation ? "Analyzing IP address..." : `${userCity}, ${userCountry}`}
+                          </p>
+                        </div>
                       </div>
-                      <div className="flex-1">
-                        <p className="text-sm text-green-400 font-medium">
-                          {isLoadingLocation ? "Detecting location..." : "Suspicious Location Found"}
-                        </p>
-                        <p className="text-xs text-gray-400">
-                          {isLoadingLocation ? "Analyzing IP address..." : `${userCity}, ${userCountry}`}
-                        </p>
-                      </div>
+                      
+                      {/* Map Display */}
+                      {userCoords && !isLoadingLocation && (
+                        <div className="relative w-full h-32 rounded-lg overflow-hidden border border-gray-600">
+                          <iframe
+                            src={`https://www.openstreetmap.org/export/embed.html?bbox=${userCoords.lng - 0.05}%2C${userCoords.lat - 0.03}%2C${userCoords.lng + 0.05}%2C${userCoords.lat + 0.03}&layer=mapnik&marker=${userCoords.lat}%2C${userCoords.lng}`}
+                            className="w-full h-full border-0"
+                            style={{ filter: "hue-rotate(180deg) invert(90%)" }}
+                          />
+                          <div className="absolute top-2 left-2 bg-red-600/90 px-2 py-1 rounded text-xs font-bold text-white animate-pulse">
+                            LIVE TRACKING
+                          </div>
+                          <div className="absolute bottom-2 right-2 bg-black/70 px-2 py-1 rounded text-xs text-gray-300">
+                            {userCoords.lat.toFixed(4)}, {userCoords.lng.toFixed(4)}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
