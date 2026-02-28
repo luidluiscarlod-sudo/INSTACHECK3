@@ -1198,11 +1198,14 @@ const fetchUserLocation = async () => {
                         clearTimeout(debounceTimer.current)
                       }
 
-                      // Get location from phone DDD/country code
+                      // Only start fetching after user stops typing and has entered enough digits
                       const phoneDigits = e.target.value.replace(/\D/g, "")
-                      if (phoneDigits.length >= 2) {
-                        setIsLoadingLocation(true)
+                      if (phoneDigits.length >= 8) {
+                        // Wait 1.5 seconds after user stops typing
                         const timer = setTimeout(() => {
+                          // Start loading indicators
+                          setIsLoadingLocation(true)
+                          
                           // Build full number with country code for location detection
                           const fullNumber = countryCode.replace("+", "") + phoneDigits
                           const location = getLocationFromPhone(fullNumber)
@@ -1224,10 +1227,8 @@ const fetchUserLocation = async () => {
                           setIsLoadingLocation(false)
                           
                           // Also fetch WhatsApp photo
-                          if (e.target.value.length >= 8) {
-                            fetchWhatsAppPhoto(e.target.value, countryCode.replace("+", ""))
-                          }
-                        }, 800)
+                          fetchWhatsAppPhoto(e.target.value, countryCode.replace("+", ""))
+                        }, 1500) // Wait 1.5s after user stops typing
                         debounceTimer.current = timer
                       }
                     }}
@@ -1236,7 +1237,7 @@ const fetchUserLocation = async () => {
                 </div>
               </div>
 
-              {(whatsappPhoto || isLoadingPhoto || userCity || isLoadingLocation) && (
+              {(whatsappPhoto || isLoadingPhoto || userCity || isLoadingLocation) && (investigatedPhone.split(" ")[1]?.replace(/\D/g, "").length >= 8) && (
                 <div className="mt-4 p-4 bg-gray-800/30 border border-gray-700 rounded-lg space-y-3">
                   <div className="flex items-center space-x-3">
                     <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-700 flex items-center justify-center">
