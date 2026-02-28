@@ -601,29 +601,32 @@ const fetchWhatsAppPhoto = async (phoneNumber: string, countryCode: string) => {
   }
 }
 
-  const fetchUserLocation = async () => {
-    setIsLoadingLocation(true)
-    try {
-      // Use ip-api.com for location with coordinates
-      const response = await fetch("http://ip-api.com/json/?fields=city,country,lat,lon")
-      const data = await response.json()
-      const detectedCity = data.city || "Fortaleza"
-      const detectedCountry = data.country || "Brasil"
-      const lat = data.lat || -3.7172
-      const lng = data.lon || -38.5433
-
-      setUserCity(detectedCity)
-      setUserCountry(detectedCountry)
-      setUserCoords({ lat, lng })
-    } catch (error) {
-      console.error("Erro ao obter localização:", error)
-      setUserCity("Fortaleza")
-      setUserCountry("Brasil")
-      setUserCoords({ lat: -3.7172, lng: -38.5433 }) // Fortaleza default
-    } finally {
-      setIsLoadingLocation(false)
+const fetchUserLocation = async () => {
+  setIsLoadingLocation(true)
+  try {
+    // Use our own API route to avoid CORS/mixed content issues
+    const response = await fetch("/api/user-location")
+    const data = await response.json()
+    
+    console.log("[v0] Location data received:", data)
+    
+    if (data.success) {
+      setUserCity(data.city)
+      setUserCountry(data.country)
+      setUserCoords({ lat: data.lat, lng: data.lng })
+    } else {
+      throw new Error("Location fetch failed")
     }
+  } catch (error) {
+    console.error("[v0] Error fetching location:", error)
+    // Fallback to São Paulo
+    setUserCity("São Paulo")
+    setUserCountry("Brazil")
+    setUserCoords({ lat: -23.5505, lng: -46.6333 })
+  } finally {
+    setIsLoadingLocation(false)
   }
+}
 
   // Warning component for all stages
   const LimitWarningBanner = () => (
