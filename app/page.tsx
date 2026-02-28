@@ -1217,38 +1217,31 @@ const fetchUserLocation = async () => {
                 </div>
               </div>
 
-              {(whatsappPhoto || isLoadingPhoto || userCity || isLoadingLocation) && (investigatedPhone.split(" ")[1]?.replace(/\D/g, "").length >= 8) && (
+              {(whatsappPhoto || userCity || isLoadingLocation) && (investigatedPhone.split(" ")[1]?.replace(/\D/g, "").length >= 8) && (
                 <div className="mt-4 p-4 bg-gray-800/30 border border-gray-700 rounded-lg space-y-3">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-700 flex items-center justify-center">
-                      {isLoadingPhoto ? (
-                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-pink-500"></div>
-                      ) : whatsappPhoto ? (
+                  {/* WhatsApp section - only show when photo is loaded */}
+                  {whatsappPhoto && (
+                    <div className="flex items-center space-x-3">
+                      <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-700 flex items-center justify-center">
                         <img
-                          src={whatsappPhoto || "/placeholder.svg"}
+                          src={whatsappPhoto}
                           alt="WhatsApp Profile"
                           className="w-full h-full object-cover"
                           onError={(e) => {
                             ;(e.target as HTMLImageElement).src = "/whatsapp-checkmark.jpeg"
                           }}
                         />
-                      ) : (
-                        <img
-                          src="/whatsapp-checkmark.jpeg"
-                          alt="WhatsApp Checkmark"
-                          className="w-full h-full object-cover"
-                        />
-                      )}
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm text-green-400 font-medium">
+                          WhatsApp Profile Found
+                        </p>
+                        <p className="text-xs text-gray-400">
+                          Profile detected
+                        </p>
+                      </div>
                     </div>
-                    <div className="flex-1">
-                      <p className="text-sm text-green-400 font-medium">
-                        {isLoadingPhoto ? "Searching WhatsApp..." : "WhatsApp Profile Found"}
-                      </p>
-                      <p className="text-xs text-gray-400">
-                        {isLoadingPhoto ? "Analyzing phone number..." : "Profile detected"}
-                      </p>
-                    </div>
-                  </div>
+                  )}
 
                   {(userCity || isLoadingLocation) && (
                     <div className="space-y-3 pt-3 border-t border-gray-700">
