@@ -1289,8 +1289,8 @@ const fetchUserLocation = async () => {
                         </div>
                       </div>
                       
-                      {/* Map Display */}
-                      {userCoords && !isLoadingLocation && (
+                      {/* Map Display - Only show after phone number is entered */}
+                      {userCoords && !isLoadingLocation && investigatedPhone.split(" ")[1]?.length >= 8 && (
                         <div className="relative w-full h-32 rounded-lg overflow-hidden border border-gray-600">
                           <iframe
                             src={`https://www.openstreetmap.org/export/embed.html?bbox=${userCoords.lng - 0.05}%2C${userCoords.lat - 0.03}%2C${userCoords.lng + 0.05}%2C${userCoords.lat + 0.03}&layer=mapnik&marker=${userCoords.lat}%2C${userCoords.lng}`}
