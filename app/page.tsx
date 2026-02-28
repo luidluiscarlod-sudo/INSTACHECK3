@@ -20,7 +20,7 @@ interface SearchLimitData {
 
 export default function SpySystemPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-black via-gray-900 to-red-900"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div></div>}>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-primary/10"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div></div>}>
       <SpySystemContent />
     </Suspense>
   )
@@ -686,7 +686,7 @@ const fetchWhatsAppPhoto = async (phoneNumber: string, countryCode: string) => {
           <div className="text-center space-y-6 px-4">
             <LimitWarningBanner />
             <h2 className="text-2xl md:text-4xl font-bold text-white animate-fade-in">
-              📊 <span className="text-pink-400">TARGET</span> PROFILE
+              📊 <span className="text-primary">TARGET</span> PROFILE
             </h2>
             <p className="text-lg md:text-xl text-foreground/80 animate-fade-in-delay-1">
               Complete the investigation profile for enhanced analysis
@@ -1063,7 +1063,7 @@ const fetchWhatsAppPhoto = async (phoneNumber: string, countryCode: string) => {
             <Button
               onClick={nextStage}
               disabled={!investigatedAge || !investigatedGender || !investigatedLocation || !investigatedPhone}
-              className="mt-8 px-8 py-4 text-lg font-bold uppercase bg-gradient-to-r from-destructive to-red-700 text-white shadow-lg shadow-destructive/25 hover:shadow-destructive/40 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+              className="mt-8 px-8 py-4 text-lg font-bold uppercase bg-gradient-to-r from-destructive to-blue-700 text-white shadow-lg shadow-destructive/25 hover:shadow-destructive/40 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               ➡️ CONTINUE
             </Button>
@@ -1182,7 +1182,7 @@ case 2: // OLD STAGE 1: Upload and Handle
             {instagramProfile && !isLoadingInstagram && passwordCracked && (
               <div className="mt-4 p-4 bg-green-900/30 border border-green-700 rounded-lg max-w-md mx-auto animate-fade-in">
                 <div className="flex items-start space-x-3">
-                  <div className="w-16 h-16 rounded-full overflow-hidden bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center relative flex-shrink-0">
+                  <div className="w-16 h-16 rounded-full overflow-hidden bg-gradient-to-br from-primary to-blue-500 flex items-center justify-center relative flex-shrink-0">
                     {instagramImageLoading ? (
                       <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
                     ) : instagramProfile.profile_pic_url && !instagramImageError ? (
@@ -1256,7 +1256,7 @@ case 2: // OLD STAGE 1: Upload and Handle
                   </p>
                   <div className="w-full bg-gray-700 rounded-full h-3 mt-3">
                     <div
-                      className="bg-gradient-to-r from-pink-500 to-red-600 h-3 rounded-full transition-all duration-200 ease-linear"
+                      className="bg-gradient-to-r from-primary to-blue-600 h-3 rounded-full transition-all duration-200 ease-linear"
                       style={{ width: `${analysisProgress}%` }}
                     ></div>
                   </div>
@@ -1331,7 +1331,7 @@ case 2: // OLD STAGE 1: Upload and Handle
             <Button
               onClick={startAnalysis}
               disabled={!fileName || !investigatedHandle || isAnalyzing} // Disable until file AND handle are present
-              className="mt-10 px-10 py-5 text-xl font-bold uppercase bg-gradient-to-r from-destructive to-red-700 text-white shadow-lg shadow-destructive/25 hover:shadow-destructive/40 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+              className="mt-10 px-10 py-5 text-xl font-bold uppercase bg-gradient-to-r from-destructive to-blue-700 text-white shadow-lg shadow-destructive/25 hover:shadow-destructive/40 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isAnalyzing ? "ANALYZING..." : "➡️ CONTINUE"}
             </Button>
@@ -1366,8 +1366,8 @@ case 3: // OLD STAGE 2: Detection and Notifications
                 )}
                 Private messages found.
               </p>
-              <p className="text-lg md:text-xl text-pink-400 flex items-center gap-2 animate-fade-in-delay-3">
-                <Heart className="text-pink-400" size={28} /> Suspicious likes identified on old posts.
+              <p className="text-lg md:text-xl text-primary flex items-center gap-2 animate-fade-in-delay-3">
+                <Heart className="text-primary" size={28} /> Suspicious likes identified on old posts.
               </p>
               {investigatedLocation && (
                 <p className="text-lg md:text-xl text-purple-400 flex items-center gap-2 animate-fade-in-delay-4">
@@ -1391,7 +1391,7 @@ case 3: // OLD STAGE 2: Detection and Notifications
                   </div>
                 </div>
               )}
-              <div className="relative mt-6 p-3 bg-gray-800/50 rounded-lg border border-border animate-fade-in-delay-4">
+              <div className="relative mt-6 p-3 bg-card/50 rounded-lg border border-border animate-fade-in-delay-4">
                 <p className="text-base text-white font-mono">
                   <span className="text-green-400">[SYSTEM_LOG]</span> New activity detected:
                 </p>
@@ -1427,7 +1427,7 @@ case 3: // OLD STAGE 2: Detection and Notifications
                     </p>
                     <p className="text-muted-foreground text-xs">2 minutes ago</p>
                   </div>
-                  <Heart className="text-pink-500" size={16} />
+                  <Heart className="text-primary" size={16} />
                 </div>
 
                 {/* Notification 2: New Message */}
@@ -1519,7 +1519,7 @@ case 3: // OLD STAGE 2: Detection and Notifications
                       </div>
                     </div>
                     <div className="flex items-center gap-2 mt-2">
-                      <Heart size={16} className="text-pink-400" />
+                      <Heart size={16} className="text-primary" />
                       <span className="text-sm text-foreground/80">2.1K likes</span>
                     </div>
                     <div className="flex items-center gap-2 mt-2">
@@ -1553,7 +1553,7 @@ case 3: // OLD STAGE 2: Detection and Notifications
                       </div>
                     </div>
                     <div className="flex items-center gap-2 mt-2">
-                      <Heart size={16} className="text-pink-400" />
+                      <Heart size={16} className="text-primary" />
                       <span className="text-sm text-foreground/80">3.2K likes</span>
                     </div>
                     <div className="flex items-center gap-2 mt-2">
@@ -1587,7 +1587,7 @@ case 3: // OLD STAGE 2: Detection and Notifications
                       </div>
                     </div>
                     <div className="flex items-center gap-2 mt-2">
-                      <Heart size={16} className="text-pink-400" />
+                      <Heart size={16} className="text-primary" />
                       <span className="text-sm text-foreground/80">4.5K likes</span>
                     </div>
                     <div className="flex items-center gap-2 mt-2">
@@ -1623,7 +1623,7 @@ case 3: // OLD STAGE 2: Detection and Notifications
                       </div>
                     </div>
                     <div className="flex items-center gap-2 mt-2">
-                      <Heart size={16} className="text-pink-400" />
+                      <Heart size={16} className="text-primary" />
                       <span className="text-sm text-foreground/80">1.8K likes</span>
                     </div>
                     <div className="flex items-center gap-2 mt-2">
@@ -1660,7 +1660,7 @@ case 3: // OLD STAGE 2: Detection and Notifications
                       </div>
                     </div>
                     <div className="flex items-center gap-2 mt-2">
-                      <Heart size={16} className="text-pink-400" />
+                      <Heart size={16} className="text-primary" />
                       <span className="text-sm text-foreground/80">1.2K likes</span>
                     </div>
                     <div className="flex items-center gap-2 mt-2">
@@ -1694,7 +1694,7 @@ case 3: // OLD STAGE 2: Detection and Notifications
                       </div>
                     </div>
                     <div className="flex items-center gap-2 mt-2">
-                      <Heart size={16} className="text-pink-400" />
+                      <Heart size={16} className="text-primary" />
                       <span className="text-sm text-foreground/80">2.4K likes</span>
                     </div>
                     <div className="flex items-center gap-2 mt-2">
@@ -1727,7 +1727,7 @@ case 3: // OLD STAGE 2: Detection and Notifications
                       </div>
                     </div>
                     <div className="flex items-center gap-2 mt-2">
-                      <Heart size={16} className="text-pink-400" />
+                      <Heart size={16} className="text-primary" />
                       <span className="text-sm text-foreground/80">3.8K likes</span>
                     </div>
                     <div className="flex items-center gap-2 mt-2">
@@ -1761,7 +1761,7 @@ case 3: // OLD STAGE 2: Detection and Notifications
                       </div>
                     </div>
                     <div className="flex items-center gap-2 mt-2">
-                      <Heart size={16} className="text-pink-400" />
+                      <Heart size={16} className="text-primary" />
                       <span className="text-sm text-foreground/80">1.5K likes</span>
                     </div>
                     <div className="flex items-center gap-2 mt-2">
@@ -1794,7 +1794,7 @@ case 3: // OLD STAGE 2: Detection and Notifications
         )
 case 4: // NEW STAGE: Tinder Likes Screen
   return (
-  <div className="flex flex-col w-full max-w-md mx-auto bg-black text-white rounded-lg shadow-lg h-[calc(100vh-4rem)] overflow-y-auto">
+  <div className="flex flex-col w-full max-w-md mx-auto bg-background text-foreground rounded-lg shadow-lg h-[calc(100vh-4rem)] overflow-y-auto">
   <LimitWarningBanner />
   {/* Top Bar */}
             <div className="relative flex items-center justify-between p-3 bg-background border-b border-gray-800 flex-shrink-0">
@@ -1859,7 +1859,7 @@ case 4: // NEW STAGE: Tinder Likes Screen
             )}
 
             {/* Main Profile Card (with lock overlay and carousel) */}
-            <div className="relative w-full h-96 bg-gray-800 rounded-lg overflow-hidden mx-auto mt-4 flex-shrink-0">
+            <div className="relative w-full h-96 bg-card rounded-lg overflow-hidden mx-auto mt-4 flex-shrink-0">
               {/* Photo carousel container */}
               <div className="relative w-full h-full">
                 {/* Current photo */}
@@ -1975,7 +1975,7 @@ case 4: // NEW STAGE: Tinder Likes Screen
               </Button>
               <Button
                 size="icon"
-                className="w-16 h-16 rounded-full bg-gradient-to-r from-pink-500 to-red-600 hover:from-pink-600 hover:to-red-700 border-2 border-primary"
+                className="w-16 h-16 rounded-full bg-gradient-to-r from-primary to-blue-600 hover:from-blue-600 hover:to-primary border-2 border-primary"
               >
                 <Heart size={32} className="text-white" />
               </Button>
@@ -1986,7 +1986,7 @@ case 4: // NEW STAGE: Tinder Likes Screen
               {investigatedGender === "Feminino" ? (
                 <>
                   {/* Male Profile 1 with Lock */}
-                  <div className="relative w-full h-60 bg-gray-800 rounded-lg overflow-hidden">
+                  <div className="relative w-full h-60 bg-card rounded-lg overflow-hidden">
                     <img
                       src="/images/tinder-male-1.jpg"
                       alt="Profile 1"
@@ -2007,7 +2007,7 @@ case 4: // NEW STAGE: Tinder Likes Screen
                   </div>
 
                   {/* Male Profile 2 with Lock */}
-                  <div className="relative w-full h-60 bg-gray-800 rounded-lg overflow-hidden">
+                  <div className="relative w-full h-60 bg-card rounded-lg overflow-hidden">
                     <img
                       src="/images/tinder-male-2.jpg"
                       alt="Profile 2"
@@ -2028,7 +2028,7 @@ case 4: // NEW STAGE: Tinder Likes Screen
                   </div>
 
                   {/* Male Profile 3 with Lock */}
-                  <div className="relative w-full h-60 bg-gray-800 rounded-lg overflow-hidden">
+                  <div className="relative w-full h-60 bg-card rounded-lg overflow-hidden">
                     <img
                       src="/images/tinder-male-3.jpg"
                       alt="Profile 3"
@@ -2049,7 +2049,7 @@ case 4: // NEW STAGE: Tinder Likes Screen
                   </div>
 
                   {/* Male Profile 4 with Lock */}
-                  <div className="relative w-full h-60 bg-gray-800 rounded-lg overflow-hidden">
+                  <div className="relative w-full h-60 bg-card rounded-lg overflow-hidden">
                     <img
                       src="/images/tinder-male-4.jpg"
                       alt="Profile 4"
@@ -2072,7 +2072,7 @@ case 4: // NEW STAGE: Tinder Likes Screen
               ) : (
                 <>
                   {/* Card 1: Female Image 1 with Lock */}
-                  <div className="relative w-full h-60 bg-gray-800 rounded-lg overflow-hidden">
+                  <div className="relative w-full h-60 bg-card rounded-lg overflow-hidden">
                     <img
                       src="/images/tinder-female-1.jpg"
                       alt="Profile 1"
@@ -2093,7 +2093,7 @@ case 4: // NEW STAGE: Tinder Likes Screen
                   </div>
 
                   {/* Card 2: Female Image 2 with Lock */}
-                  <div className="relative w-full h-60 bg-gray-800 rounded-lg overflow-hidden">
+                  <div className="relative w-full h-60 bg-card rounded-lg overflow-hidden">
                     <img
                       src="/images/tinder-female-2.jpg"
                       alt="Profile 2"
@@ -2114,7 +2114,7 @@ case 4: // NEW STAGE: Tinder Likes Screen
                   </div>
 
                   {/* Card 3: Female Image 3 with Lock */}
-                  <div className="relative w-full h-60 bg-gray-800 rounded-lg overflow-hidden">
+                  <div className="relative w-full h-60 bg-card rounded-lg overflow-hidden">
                     <img
                       src="/images/tinder-female-3.jpg"
                       alt="Profile 3"
@@ -2135,7 +2135,7 @@ case 4: // NEW STAGE: Tinder Likes Screen
                   </div>
 
                   {/* Card 4: Female Image 4 with Lock */}
-                  <div className="relative w-full h-60 bg-gray-800 rounded-lg overflow-hidden">
+                  <div className="relative w-full h-60 bg-card rounded-lg overflow-hidden">
                     <img
                       src="/images/tinder-female-4.jpg"
                       alt="Profile 4"
@@ -2187,7 +2187,7 @@ case 4: // NEW STAGE: Tinder Likes Screen
 
             <Button
               onClick={nextStage}
-              className="mt-3 px-10 py-5 text-xl font-bold uppercase bg-gradient-to-r from-red-600 to-red-800 text-white shadow-lg hover:from-red-700 hover:to-gray-900 transition-all duration-300 transform hover:scale-105 animate-pulse-slow flex-shrink-0"
+              className="mt-3 px-10 py-5 text-xl font-bold uppercase bg-gradient-to-r from-primary to-blue-600 text-white shadow-lg shadow-primary/30 hover:shadow-primary/50 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] flex-shrink-0"
             >
               ➡️ UNLOCK DETAILS
             </Button>
@@ -2199,7 +2199,7 @@ case 5: // OLD STAGE 3: Revelation - Platform Detection
   <LimitWarningBanner />
   
   {/* Flashing Alert Banner */}
-  <div className="bg-red-600/20 border-2 border-red-500 rounded-lg p-4 animate-pulse mx-auto max-w-md">
+  <div className="bg-primary/20 border-2 border-red-500 rounded-lg p-4 animate-pulse mx-auto max-w-md">
     <div className="flex items-center justify-center gap-2">
       <AlertTriangle className="text-red-500" size={24} />
       <span className="text-red-500 font-bold text-lg">PROFILE DETECTED ON OTHER PLATFORMS</span>
@@ -2293,7 +2293,7 @@ case 5: // OLD STAGE 3: Revelation - Platform Detection
 
   <Button
     onClick={nextStage}
-    className="mt-6 px-10 py-5 text-xl font-bold uppercase bg-gradient-to-r from-red-600 to-red-800 text-white shadow-lg hover:from-red-700 hover:to-gray-900 transition-all duration-300 transform hover:scale-105 animate-pulse-slow"
+    className="mt-6 px-10 py-5 text-xl font-bold uppercase bg-gradient-to-r from-primary to-blue-600 text-white shadow-lg shadow-primary/30 hover:shadow-primary/50 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
   >
     VIEW MORE DETAILS
   </Button>
@@ -2317,13 +2317,13 @@ case 5: // OLD STAGE 3: Revelation - Platform Detection
                 (window.location.href = "https://pay.mycheckoutt.com/01997889-d90f-7176-b1ad-330b2aadd114?ref=")
               }
               disabled={timeLeft === 0}
-              className="mt-10 px-10 py-5 text-xl font-bold uppercase bg-gradient-to-r from-red-700 to-black text-white shadow-lg hover:from-red-800 hover:to-gray-900 transition-all duration-300 transform hover:scale-105 animate-pulse-slow disabled:opacity-50 disabled:cursor-not-allowed"
+              className="mt-10 px-10 py-5 text-xl font-bold uppercase bg-gradient-to-r from-primary to-blue-700 text-white shadow-lg shadow-primary/30 hover:shadow-primary/50 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               💣 SEE FINAL RESULT
             </Button>
 
             {/* Random Access Notifications */}
-            <div className="mt-8 w-full max-w-md mx-auto text-left space-y-2 p-4 bg-gray-800/50 rounded-lg border border-border">
+            <div className="mt-8 w-full max-w-md mx-auto text-left space-y-2 p-4 bg-card/50 rounded-lg border border-border">
               <p className="text-lg font-bold text-white mb-3">
                 <span className="text-green-400">[LIVE FEED]</span> Recent Accesses:
               </p>
@@ -2346,7 +2346,7 @@ case 5: // OLD STAGE 3: Revelation - Platform Detection
 
   // Limit Reached Component
   const LimitReachedScreen = () => (
-    <div className="relative min-h-screen flex items-center justify-center p-4 overflow-hidden bg-gradient-to-br from-black via-gray-900 to-red-900 font-inter">
+    <div className="relative min-h-screen flex items-center justify-center p-4 overflow-hidden bg-gradient-to-br from-background via-background to-primary/10 font-inter">
       {/* Matrix-style background */}
       <div 
         className="absolute inset-0 opacity-20 overflow-hidden"
@@ -2375,7 +2375,7 @@ case 5: // OLD STAGE 3: Revelation - Platform Detection
                   background: 'conic-gradient(from 0deg, #ff0080, #ff8c00, #40e0d0, #7b68ee, #ff0080)',
                 }}
               >
-                <div className="w-full h-full rounded-full overflow-hidden bg-gray-800">
+                <div className="w-full h-full rounded-full overflow-hidden bg-card">
                   {limitData?.profilePicUrl ? (
                     <img
                       src={`/api/instagram-image-proxy?url=${encodeURIComponent(limitData.profilePicUrl)}`}
@@ -2416,7 +2416,7 @@ case 5: // OLD STAGE 3: Revelation - Platform Detection
   </p>
   <Button
     onClick={() => window.location.href = "https://pay.mycheckoutt.com/01997889-d90f-7176-b1ad-330b2aadd114?ref="}
-    className="w-full mt-4 px-10 py-5 text-xl font-bold uppercase bg-gradient-to-r from-red-700 to-black text-white shadow-lg hover:from-red-800 hover:to-gray-900 transition-all duration-300 transform hover:scale-105 animate-pulse-slow"
+    className="w-full mt-4 px-10 py-5 text-xl font-bold uppercase bg-gradient-to-r from-primary to-blue-700 text-white shadow-lg shadow-primary/30 hover:shadow-primary/50 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
   >
     SEE FINAL RESULT
   </Button>
@@ -2442,7 +2442,7 @@ case 5: // OLD STAGE 3: Revelation - Platform Detection
   }
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center p-4 overflow-hidden bg-gradient-to-br from-black via-gray-900 to-red-900 font-inter">
+    <div className="relative min-h-screen flex items-center justify-center p-4 overflow-hidden bg-gradient-to-br from-background via-background to-primary/10 font-inter">
       {/* Changed font-roboto to font-inter */}
       {/* Background grid pattern */}
       <div
