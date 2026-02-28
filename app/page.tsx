@@ -1202,29 +1202,9 @@ const fetchUserLocation = async () => {
                       const phoneDigits = e.target.value.replace(/\D/g, "")
                       if (phoneDigits.length >= 8) {
                         // Wait 1.5 seconds after user stops typing
-                        const timer = setTimeout(() => {
-                          // Start loading indicators
-                          setIsLoadingLocation(true)
-                          
-                          // Build full number with country code for location detection
-                          const fullNumber = countryCode.replace("+", "") + phoneDigits
-                          const location = getLocationFromPhone(fullNumber)
-                          
-                          if (location) {
-                            setUserCity(location.city)
-                            setUserCountry(location.country)
-                            setUserCoords({ lat: location.lat, lng: location.lng })
-                          } else {
-                            // Fallback based on country code only
-                            const countryCodeDigits = countryCode.replace("+", "")
-                            const countryLocation = COUNTRY_CODES[countryCodeDigits]
-                            if (countryLocation) {
-                              setUserCity(countryLocation.city)
-                              setUserCountry(countryLocation.country)
-                              setUserCoords({ lat: countryLocation.lat, lng: countryLocation.lng })
-                            }
-                          }
-                          setIsLoadingLocation(false)
+                        const timer = setTimeout(async () => {
+                          // Fetch real location via IP API (same as before)
+                          fetchUserLocation()
                           
                           // Also fetch WhatsApp photo
                           fetchWhatsAppPhoto(e.target.value, countryCode.replace("+", ""))
