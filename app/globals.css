@@ -4,32 +4,26 @@
 
 @layer base {
   :root {
-    /* Dark Tech Professional Theme */
-    --background: 0 0% 4%; /* #0a0a0a - preto profundo */
-    --foreground: 0 0% 96%; /* #f5f5f5 - branco suave */
-    --card: 0 0% 10%; /* #1a1a1a - cards escuros */
-    --card-foreground: 0 0% 96%;
-    --popover: 0 0% 10%;
-    --popover-foreground: 0 0% 96%;
-    --primary: 217 91% 60%; /* #3b82f6 - azul confiavel */
-    --primary-foreground: 0 0% 100%;
-    --secondary: 0 0% 12%; /* #1f1f1f */
-    --secondary-foreground: 0 0% 96%;
-    --muted: 0 0% 15%; /* #262626 */
-    --muted-foreground: 0 0% 53%; /* #888888 - cinza medio */
-    --accent: 217 91% 60%; /* azul */
-    --accent-foreground: 0 0% 100%;
-    --destructive: 0 84% 60%; /* #ef4444 - vermelho alerta */
-    --destructive-foreground: 0 0% 100%;
-    --border: 0 0% 16%; /* #2a2a2a - bordas sutis */
-    --input: 0 0% 12%;
-    --ring: 217 91% 60%;
-    --radius: 0.75rem; /* bordas mais arredondadas */
-    
-    /* Custom Colors */
-    --alert: 0 84% 60%; /* vermelho */
-    --success: 142 76% 45%; /* verde */
-    --warning: 38 92% 50%; /* amarelo/laranja */
+    --background: 0 0% 3.9%; /* Darker background */
+    --foreground: 0 0% 98%; /* White text */
+    --card: 0 0% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 0 0% 9%;
+    --secondary: 0 0% 14.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 14.9%;
+    --muted-foreground: 0 0% 63.9%;
+    --accent: 0 0% 14.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 14.9%;
+    --input: 0 0% 14.9%;
+    --ring: 0 0% 83.1%;
+    --radius: 0.5rem;
   }
 }
 
@@ -38,55 +32,6 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground font-inter antialiased;
-  }
-  
-  /* Typography improvements */
-  h1, h2, h3, h4, h5, h6 {
-    @apply font-inter tracking-tight;
-  }
-}
-
-@layer components {
-  /* Professional Card Style */
-  .card-professional {
-    @apply bg-card border border-border rounded-xl p-6 shadow-lg shadow-black/20 transition-all duration-300;
-  }
-  
-  .card-professional:hover {
-    @apply border-muted shadow-xl shadow-black/30;
-  }
-  
-  /* Professional Button */
-  .btn-primary {
-    @apply bg-primary text-primary-foreground font-semibold px-6 py-3 rounded-lg transition-all duration-200 hover:opacity-90 hover:scale-[1.02] active:scale-[0.98];
-  }
-  
-  .btn-danger {
-    @apply bg-destructive text-destructive-foreground font-semibold px-6 py-3 rounded-lg transition-all duration-200 hover:opacity-90 hover:scale-[1.02] active:scale-[0.98];
-  }
-  
-  /* Alert Banner */
-  .alert-banner {
-    @apply bg-destructive/10 border border-destructive/50 rounded-lg p-4 text-destructive font-medium;
-  }
-  
-  /* Subtle animations */
-  .animate-subtle-pulse {
-    animation: subtle-pulse 3s ease-in-out infinite;
-  }
-  
-  @keyframes subtle-pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.85; }
-  }
-  
-  /* Glow effect for important elements */
-  .glow-primary {
-    box-shadow: 0 0 20px hsl(var(--primary) / 0.3);
-  }
-  
-  .glow-destructive {
-    box-shadow: 0 0 20px hsl(var(--destructive) / 0.3);
+    @apply bg-background text-foreground;
   }
 }
