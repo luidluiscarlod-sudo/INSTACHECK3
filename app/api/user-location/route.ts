@@ -5,42 +5,75 @@ export async function GET(request: Request) {
     // Get client IP from headers
     const forwardedFor = request.headers.get("x-forwarded-for")
     const realIp = request.headers.get("x-real-ip")
-    const clientIp = forwardedFor?.split(",")[0] || realIp || ""
+    const clientIp = forwardedFor?.split(",")[0]?.trim() || realIp || ""
     
-    console.log("[v0] Location API - Client IP:", clientIp)
+    // Try multiple geolocation APIs for reliability
+    let locationData = null
     
-    // Use ip-api.com (works server-side with http)
-    const apiUrl = clientIp 
-      ? `http://ip-api.com/json/${clientIp}?fields=status,city,country,lat,lon`
-      : `http://ip-api.com/json/?fields=status,city,country,lat,lon`
-    
-    const response = await fetch(apiUrl, {
-      headers: {
-        "User-Agent": "InstaCheck/1.0"
+    // Try ipapi.co first (HTTPS, free tier 1000/day)
+    try {
+      const ipapiUrl = clientIp 
+        ? `https://ipapi.co/${clientIp}/json/`
+        : `https://ipapi.co/json/`
+      
+      const response = await fetch(ipapiUrl, {
+        headers: { "User-Agent": "InstaCheck/1.0" },
+        signal: AbortSignal.timeout(5000)
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        if (data.city && data.latitude) {
+          locationData = {
+            city: data.city,
+            country: data.country_name,
+            lat: data.latitude,
+            lng: data.longitude
+          }
+        }
       }
-    })
-    
-    if (!response.ok) {
-      throw new Error(`API returned ${response.status}`)
+    } catch (e) {
+      // Continue to next API
     }
     
-    const data = await response.json()
-    console.log("[v0] Location API response:", data)
-    
-    if (data.status === "fail") {
-      throw new Error("IP lookup failed")
+    // Fallback to ipwho.is (HTTPS, unlimited free)
+    if (!locationData) {
+      try {
+        const ipwhoisUrl = clientIp 
+          ? `https://ipwho.is/${clientIp}`
+          : `https://ipwho.is/`
+        
+        const response = await fetch(ipwhoisUrl, {
+          headers: { "User-Agent": "InstaCheck/1.0" },
+          signal: AbortSignal.timeout(5000)
+        })
+        
+        if (response.ok) {
+          const data = await response.json()
+          if (data.success !== false && data.city) {
+            locationData = {
+              city: data.city,
+              country: data.country,
+              lat: data.latitude,
+              lng: data.longitude
+            }
+          }
+        }
+      } catch (e) {
+        // Continue to fallback
+      }
     }
     
-    return NextResponse.json({
-      success: true,
-      city: data.city || "Unknown",
-      country: data.country || "Unknown", 
-      lat: data.lat || 0,
-      lng: data.lon || 0
-    })
+    if (locationData) {
+      return NextResponse.json({
+        success: true,
+        ...locationData
+      })
+    }
+    
+    throw new Error("All geolocation APIs failed")
+    
   } catch (error) {
-    console.error("[v0] Location API error:", error)
-    
     // Return a realistic fallback based on common Brazilian cities
     const fallbackCities = [
       { city: "São Paulo", country: "Brazil", lat: -23.5505, lng: -46.6333 },
