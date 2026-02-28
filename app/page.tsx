@@ -11,6 +11,181 @@ import { AlertTriangle } from "lucide-react"
 const LIMIT_KEY = "instacheck_search_limit"
 const MAX_SEARCHES = 1
 
+// DDD to Location mapping (Brazil)
+const DDD_LOCATIONS: Record<string, { city: string; state: string; lat: number; lng: number }> = {
+  "11": { city: "São Paulo", state: "SP", lat: -23.5505, lng: -46.6333 },
+  "12": { city: "São José dos Campos", state: "SP", lat: -23.1896, lng: -45.8841 },
+  "13": { city: "Santos", state: "SP", lat: -23.9608, lng: -46.3336 },
+  "14": { city: "Bauru", state: "SP", lat: -22.3246, lng: -49.0871 },
+  "15": { city: "Sorocaba", state: "SP", lat: -23.5015, lng: -47.4526 },
+  "16": { city: "Ribeirão Preto", state: "SP", lat: -21.1775, lng: -47.8103 },
+  "17": { city: "São José do Rio Preto", state: "SP", lat: -20.8113, lng: -49.3758 },
+  "18": { city: "Presidente Prudente", state: "SP", lat: -22.1207, lng: -51.3882 },
+  "19": { city: "Campinas", state: "SP", lat: -22.9099, lng: -47.0626 },
+  "21": { city: "Rio de Janeiro", state: "RJ", lat: -22.9068, lng: -43.1729 },
+  "22": { city: "Campos dos Goytacazes", state: "RJ", lat: -21.7545, lng: -41.3244 },
+  "24": { city: "Volta Redonda", state: "RJ", lat: -22.5232, lng: -44.1042 },
+  "27": { city: "Vitória", state: "ES", lat: -20.3155, lng: -40.3128 },
+  "28": { city: "Cachoeiro de Itapemirim", state: "ES", lat: -20.8488, lng: -41.1128 },
+  "31": { city: "Belo Horizonte", state: "MG", lat: -19.9167, lng: -43.9345 },
+  "32": { city: "Juiz de Fora", state: "MG", lat: -21.7642, lng: -43.3496 },
+  "33": { city: "Governador Valadares", state: "MG", lat: -18.8510, lng: -41.9493 },
+  "34": { city: "Uberlândia", state: "MG", lat: -18.9186, lng: -48.2772 },
+  "35": { city: "Poços de Caldas", state: "MG", lat: -21.7878, lng: -46.5613 },
+  "37": { city: "Divinópolis", state: "MG", lat: -20.1389, lng: -44.8842 },
+  "38": { city: "Montes Claros", state: "MG", lat: -16.7350, lng: -43.8617 },
+  "41": { city: "Curitiba", state: "PR", lat: -25.4284, lng: -49.2733 },
+  "42": { city: "Ponta Grossa", state: "PR", lat: -25.0945, lng: -50.1633 },
+  "43": { city: "Londrina", state: "PR", lat: -23.3045, lng: -51.1696 },
+  "44": { city: "Maringá", state: "PR", lat: -23.4205, lng: -51.9333 },
+  "45": { city: "Foz do Iguaçu", state: "PR", lat: -25.5163, lng: -54.5854 },
+  "46": { city: "Francisco Beltrão", state: "PR", lat: -26.0785, lng: -53.0522 },
+  "47": { city: "Joinville", state: "SC", lat: -26.3044, lng: -48.8487 },
+  "48": { city: "Florianópolis", state: "SC", lat: -27.5954, lng: -48.5480 },
+  "49": { city: "Chapecó", state: "SC", lat: -27.1004, lng: -52.6152 },
+  "51": { city: "Porto Alegre", state: "RS", lat: -30.0346, lng: -51.2177 },
+  "53": { city: "Pelotas", state: "RS", lat: -31.7654, lng: -52.3376 },
+  "54": { city: "Caxias do Sul", state: "RS", lat: -29.1634, lng: -51.1797 },
+  "55": { city: "Santa Maria", state: "RS", lat: -29.6868, lng: -53.8149 },
+  "61": { city: "Brasília", state: "DF", lat: -15.8267, lng: -47.9218 },
+  "62": { city: "Goiânia", state: "GO", lat: -16.6864, lng: -49.2643 },
+  "63": { city: "Palmas", state: "TO", lat: -10.2128, lng: -48.3603 },
+  "64": { city: "Rio Verde", state: "GO", lat: -17.7923, lng: -50.9192 },
+  "65": { city: "Cuiabá", state: "MT", lat: -15.6014, lng: -56.0979 },
+  "66": { city: "Rondonópolis", state: "MT", lat: -16.4673, lng: -54.6372 },
+  "67": { city: "Campo Grande", state: "MS", lat: -20.4697, lng: -54.6201 },
+  "68": { city: "Rio Branco", state: "AC", lat: -9.9754, lng: -67.8249 },
+  "69": { city: "Porto Velho", state: "RO", lat: -8.7612, lng: -63.9004 },
+  "71": { city: "Salvador", state: "BA", lat: -12.9714, lng: -38.5014 },
+  "73": { city: "Ilhéus", state: "BA", lat: -14.7942, lng: -39.0361 },
+  "74": { city: "Juazeiro", state: "BA", lat: -9.4163, lng: -40.5033 },
+  "75": { city: "Feira de Santana", state: "BA", lat: -12.2664, lng: -38.9663 },
+  "77": { city: "Barreiras", state: "BA", lat: -12.1528, lng: -44.9900 },
+  "79": { city: "Aracaju", state: "SE", lat: -10.9472, lng: -37.0731 },
+  "81": { city: "Recife", state: "PE", lat: -8.0476, lng: -34.8770 },
+  "82": { city: "Maceió", state: "AL", lat: -9.6498, lng: -35.7089 },
+  "83": { city: "João Pessoa", state: "PB", lat: -7.1195, lng: -34.8450 },
+  "84": { city: "Natal", state: "RN", lat: -5.7945, lng: -35.2110 },
+  "85": { city: "Fortaleza", state: "CE", lat: -3.7172, lng: -38.5433 },
+  "86": { city: "Teresina", state: "PI", lat: -5.0920, lng: -42.8038 },
+  "87": { city: "Petrolina", state: "PE", lat: -9.3891, lng: -40.5028 },
+  "88": { city: "Juazeiro do Norte", state: "CE", lat: -7.2130, lng: -39.3150 },
+  "89": { city: "Picos", state: "PI", lat: -7.0767, lng: -41.4669 },
+  "91": { city: "Belém", state: "PA", lat: -1.4558, lng: -48.4902 },
+  "92": { city: "Manaus", state: "AM", lat: -3.1190, lng: -60.0217 },
+  "93": { city: "Santarém", state: "PA", lat: -2.4431, lng: -54.7083 },
+  "94": { city: "Marabá", state: "PA", lat: -5.3687, lng: -49.1178 },
+  "95": { city: "Boa Vista", state: "RR", lat: 2.8235, lng: -60.6758 },
+  "96": { city: "Macapá", state: "AP", lat: 0.0349, lng: -51.0694 },
+  "97": { city: "Coari", state: "AM", lat: -4.0850, lng: -63.1408 },
+  "98": { city: "São Luís", state: "MA", lat: -2.5307, lng: -44.3068 },
+  "99": { city: "Imperatriz", state: "MA", lat: -5.5264, lng: -47.4916 },
+}
+
+// International country codes to location
+const COUNTRY_CODES: Record<string, { country: string; city: string; lat: number; lng: number }> = {
+  "1": { country: "United States", city: "New York", lat: 40.7128, lng: -74.0060 },
+  "7": { country: "Russia", city: "Moscow", lat: 55.7558, lng: 37.6173 },
+  "20": { country: "Egypt", city: "Cairo", lat: 30.0444, lng: 31.2357 },
+  "27": { country: "South Africa", city: "Johannesburg", lat: -26.2041, lng: 28.0473 },
+  "30": { country: "Greece", city: "Athens", lat: 37.9838, lng: 23.7275 },
+  "31": { country: "Netherlands", city: "Amsterdam", lat: 52.3676, lng: 4.9041 },
+  "32": { country: "Belgium", city: "Brussels", lat: 50.8503, lng: 4.3517 },
+  "33": { country: "France", city: "Paris", lat: 48.8566, lng: 2.3522 },
+  "34": { country: "Spain", city: "Madrid", lat: 40.4168, lng: -3.7038 },
+  "36": { country: "Hungary", city: "Budapest", lat: 47.4979, lng: 19.0402 },
+  "39": { country: "Italy", city: "Rome", lat: 41.9028, lng: 12.4964 },
+  "40": { country: "Romania", city: "Bucharest", lat: 44.4268, lng: 26.1025 },
+  "41": { country: "Switzerland", city: "Zurich", lat: 47.3769, lng: 8.5417 },
+  "43": { country: "Austria", city: "Vienna", lat: 48.2082, lng: 16.3738 },
+  "44": { country: "United Kingdom", city: "London", lat: 51.5074, lng: -0.1278 },
+  "45": { country: "Denmark", city: "Copenhagen", lat: 55.6761, lng: 12.5683 },
+  "46": { country: "Sweden", city: "Stockholm", lat: 59.3293, lng: 18.0686 },
+  "47": { country: "Norway", city: "Oslo", lat: 59.9139, lng: 10.7522 },
+  "48": { country: "Poland", city: "Warsaw", lat: 52.2297, lng: 21.0122 },
+  "49": { country: "Germany", city: "Berlin", lat: 52.5200, lng: 13.4050 },
+  "51": { country: "Peru", city: "Lima", lat: -12.0464, lng: -77.0428 },
+  "52": { country: "Mexico", city: "Mexico City", lat: 19.4326, lng: -99.1332 },
+  "53": { country: "Cuba", city: "Havana", lat: 23.1136, lng: -82.3666 },
+  "54": { country: "Argentina", city: "Buenos Aires", lat: -34.6037, lng: -58.3816 },
+  "55": { country: "Brazil", city: "São Paulo", lat: -23.5505, lng: -46.6333 },
+  "56": { country: "Chile", city: "Santiago", lat: -33.4489, lng: -70.6693 },
+  "57": { country: "Colombia", city: "Bogotá", lat: 4.7110, lng: -74.0721 },
+  "58": { country: "Venezuela", city: "Caracas", lat: 10.4806, lng: -66.9036 },
+  "60": { country: "Malaysia", city: "Kuala Lumpur", lat: 3.1390, lng: 101.6869 },
+  "61": { country: "Australia", city: "Sydney", lat: -33.8688, lng: 151.2093 },
+  "62": { country: "Indonesia", city: "Jakarta", lat: -6.2088, lng: 106.8456 },
+  "63": { country: "Philippines", city: "Manila", lat: 14.5995, lng: 120.9842 },
+  "64": { country: "New Zealand", city: "Auckland", lat: -36.8485, lng: 174.7633 },
+  "65": { country: "Singapore", city: "Singapore", lat: 1.3521, lng: 103.8198 },
+  "66": { country: "Thailand", city: "Bangkok", lat: 13.7563, lng: 100.5018 },
+  "81": { country: "Japan", city: "Tokyo", lat: 35.6762, lng: 139.6503 },
+  "82": { country: "South Korea", city: "Seoul", lat: 37.5665, lng: 126.9780 },
+  "84": { country: "Vietnam", city: "Hanoi", lat: 21.0285, lng: 105.8542 },
+  "86": { country: "China", city: "Beijing", lat: 39.9042, lng: 116.4074 },
+  "90": { country: "Turkey", city: "Istanbul", lat: 41.0082, lng: 28.9784 },
+  "91": { country: "India", city: "New Delhi", lat: 28.6139, lng: 77.2090 },
+  "92": { country: "Pakistan", city: "Karachi", lat: 24.8607, lng: 67.0011 },
+  "93": { country: "Afghanistan", city: "Kabul", lat: 34.5553, lng: 69.2075 },
+  "94": { country: "Sri Lanka", city: "Colombo", lat: 6.9271, lng: 79.8612 },
+  "95": { country: "Myanmar", city: "Yangon", lat: 16.8661, lng: 96.1951 },
+  "98": { country: "Iran", city: "Tehran", lat: 35.6892, lng: 51.3890 },
+  "212": { country: "Morocco", city: "Casablanca", lat: 33.5731, lng: -7.5898 },
+  "213": { country: "Algeria", city: "Algiers", lat: 36.7538, lng: 3.0588 },
+  "234": { country: "Nigeria", city: "Lagos", lat: 6.5244, lng: 3.3792 },
+  "351": { country: "Portugal", city: "Lisbon", lat: 38.7223, lng: -9.1393 },
+  "352": { country: "Luxembourg", city: "Luxembourg", lat: 49.6117, lng: 6.1319 },
+  "353": { country: "Ireland", city: "Dublin", lat: 53.3498, lng: -6.2603 },
+  "354": { country: "Iceland", city: "Reykjavik", lat: 64.1466, lng: -21.9426 },
+  "358": { country: "Finland", city: "Helsinki", lat: 60.1699, lng: 24.9384 },
+  "380": { country: "Ukraine", city: "Kyiv", lat: 50.4501, lng: 30.5234 },
+  "420": { country: "Czech Republic", city: "Prague", lat: 50.0755, lng: 14.4378 },
+  "595": { country: "Paraguay", city: "Asunción", lat: -25.2637, lng: -57.5759 },
+  "598": { country: "Uruguay", city: "Montevideo", lat: -34.9011, lng: -56.1645 },
+  "852": { country: "Hong Kong", city: "Hong Kong", lat: 22.3193, lng: 114.1694 },
+  "886": { country: "Taiwan", city: "Taipei", lat: 25.0330, lng: 121.5654 },
+  "971": { country: "UAE", city: "Dubai", lat: 25.2048, lng: 55.2708 },
+  "972": { country: "Israel", city: "Tel Aviv", lat: 32.0853, lng: 34.7818 },
+}
+
+// Function to get location from phone number
+const getLocationFromPhone = (phone: string): { city: string; country: string; lat: number; lng: number } | null => {
+  // Remove all non-digit characters
+  const digits = phone.replace(/\D/g, "")
+  
+  if (digits.length < 2) return null
+  
+  // Check if it's a Brazilian number (starts with 55 or has 10-11 digits without country code)
+  if (digits.startsWith("55") && digits.length >= 4) {
+    // Brazilian number with country code: 55 + DDD + number
+    const ddd = digits.substring(2, 4)
+    const location = DDD_LOCATIONS[ddd]
+    if (location) {
+      return { city: location.city, country: "Brazil", lat: location.lat, lng: location.lng }
+    }
+  } else if (digits.length >= 10 && digits.length <= 11) {
+    // Brazilian number without country code
+    const ddd = digits.substring(0, 2)
+    const location = DDD_LOCATIONS[ddd]
+    if (location) {
+      return { city: location.city, country: "Brazil", lat: location.lat, lng: location.lng }
+    }
+  }
+  
+  // Check international codes (try longer codes first)
+  for (const codeLength of [3, 2, 1]) {
+    if (digits.length >= codeLength) {
+      const code = digits.substring(0, codeLength)
+      const location = COUNTRY_CODES[code]
+      if (location) {
+        return { city: location.city, country: location.country, lat: location.lat, lng: location.lng }
+      }
+    }
+  }
+  
+  return null
+}
+
 interface SearchLimitData {
   searchedUsername: string
   searchedAt: number
@@ -145,6 +320,7 @@ function SpySystemContent() {
   const [userCity, setUserCity] = useState<string>("")
   const [userCountry, setUserCountry] = useState<string>("")
   const [isLoadingLocation, setIsLoadingLocation] = useState(false)
+  const [userCoords, setUserCoords] = useState<{lat: number, lng: number} | null>(null)
 
   // State for Instagram profile
   const [instagramProfile, setInstagramProfile] = useState<any>(null)
@@ -598,24 +774,32 @@ const fetchWhatsAppPhoto = async (phoneNumber: string, countryCode: string) => {
   }
 }
 
-  const fetchUserLocation = async () => {
-    setIsLoadingLocation(true)
-    try {
-      const response = await fetch("https://wtfismyip.com/json")
-      const data = await response.json()
-      const detectedCity = data.YourFuckingCity || "Fortaleza"
-      const detectedCountry = data.YourFuckingCountry || "Brasil"
-
-      setUserCity(detectedCity)
-      setUserCountry(detectedCountry)
-    } catch (error) {
-      console.error("Erro ao obter localização:", error)
-      setUserCity("Fortaleza")
-      setUserCountry("Brasil")
-    } finally {
-      setIsLoadingLocation(false)
+const fetchUserLocation = async () => {
+  setIsLoadingLocation(true)
+  try {
+    // Use our own API route to avoid CORS/mixed content issues
+    const response = await fetch("/api/user-location")
+    const data = await response.json()
+    
+    console.log("[v0] Location data received:", data)
+    
+    if (data.success) {
+      setUserCity(data.city)
+      setUserCountry(data.country)
+      setUserCoords({ lat: data.lat, lng: data.lng })
+    } else {
+      throw new Error("Location fetch failed")
     }
+  } catch (error) {
+    console.error("[v0] Error fetching location:", error)
+    // Fallback to São Paulo
+    setUserCity("São Paulo")
+    setUserCountry("Brazil")
+    setUserCoords({ lat: -23.5505, lng: -46.6333 })
+  } finally {
+    setIsLoadingLocation(false)
   }
+}
 
   // Warning component for all stages
   const LimitWarningBanner = () => (
@@ -765,12 +949,33 @@ const fetchWhatsAppPhoto = async (phoneNumber: string, countryCode: string) => {
                         clearTimeout(debounceTimer.current)
                       }
 
-                      if (phoneNumber && phoneNumber.length >= 8) {
-                        const timer = setTimeout(() => {
+                      // Update location based on country code and phone
+                      setIsLoadingLocation(true)
+                      const timer = setTimeout(() => {
+                        const fullNumber = countryCode.replace("+", "") + phoneNumber.replace(/\D/g, "")
+                        const location = getLocationFromPhone(fullNumber)
+                        
+                        if (location) {
+                          setUserCity(location.city)
+                          setUserCountry(location.country)
+                          setUserCoords({ lat: location.lat, lng: location.lng })
+                        } else {
+                          // Fallback to country code location
+                          const countryCodeDigits = countryCode.replace("+", "")
+                          const countryLocation = COUNTRY_CODES[countryCodeDigits]
+                          if (countryLocation) {
+                            setUserCity(countryLocation.city)
+                            setUserCountry(countryLocation.country)
+                            setUserCoords({ lat: countryLocation.lat, lng: countryLocation.lng })
+                          }
+                        }
+                        setIsLoadingLocation(false)
+
+                        if (phoneNumber && phoneNumber.length >= 8) {
                           fetchWhatsAppPhoto(phoneNumber, countryCode.replace("+", ""))
-                        }, 1000) // Wait 1 second after user stops typing
-                        debounceTimer.current = timer
-                      }
+                        }
+                      }, 500)
+                      debounceTimer.current = timer
                     }}
                     className="w-24 p-3 pl-10 bg-gray-800/50 border border-gray-700 rounded-l-lg text-white text-xs focus:outline-none focus:ring-2 focus:ring-pink-500"
                   >
@@ -993,10 +1198,17 @@ const fetchWhatsAppPhoto = async (phoneNumber: string, countryCode: string) => {
                         clearTimeout(debounceTimer.current)
                       }
 
-                      if (e.target.value.length >= 8) {
-                        const timer = setTimeout(() => {
+                      // Only start fetching after user stops typing and has entered enough digits
+                      const phoneDigits = e.target.value.replace(/\D/g, "")
+                      if (phoneDigits.length >= 8) {
+                        // Wait 1.5 seconds after user stops typing
+                        const timer = setTimeout(async () => {
+                          // Fetch real location via IP API (same as before)
+                          fetchUserLocation()
+                          
+                          // Also fetch WhatsApp photo
                           fetchWhatsAppPhoto(e.target.value, countryCode.replace("+", ""))
-                        }, 1000) // Wait 1 second after user stops typing
+                        }, 1500) // Wait 1.5s after user stops typing
                         debounceTimer.current = timer
                       }
                     }}
@@ -1005,7 +1217,7 @@ const fetchWhatsAppPhoto = async (phoneNumber: string, countryCode: string) => {
                 </div>
               </div>
 
-              {(whatsappPhoto || isLoadingPhoto || userCity || isLoadingLocation) && (
+              {(whatsappPhoto || isLoadingPhoto || userCity || isLoadingLocation) && (investigatedPhone.split(" ")[1]?.replace(/\D/g, "").length >= 8) && (
                 <div className="mt-4 p-4 bg-gray-800/30 border border-gray-700 rounded-lg space-y-3">
                   <div className="flex items-center space-x-3">
                     <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-700 flex items-center justify-center">
@@ -1039,22 +1251,41 @@ const fetchWhatsAppPhoto = async (phoneNumber: string, countryCode: string) => {
                   </div>
 
                   {(userCity || isLoadingLocation) && (
-                    <div className="flex items-center space-x-3 pt-3 border-t border-gray-700">
-                      <div className="w-12 h-12 rounded-full bg-green-900/30 flex items-center justify-center">
-                        {isLoadingLocation ? (
-                          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-green-500"></div>
-                        ) : (
-                          <MapPin className="text-green-400" size={20} />
-                        )}
+                    <div className="space-y-3 pt-3 border-t border-gray-700">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-12 h-12 rounded-full bg-green-900/30 flex items-center justify-center">
+                          {isLoadingLocation ? (
+                            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-green-500"></div>
+                          ) : (
+                            <MapPin className="text-green-400" size={20} />
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm text-green-400 font-medium">
+                            {isLoadingLocation ? "Detecting location..." : "Suspicious Location Found"}
+                          </p>
+                          <p className="text-xs text-gray-400">
+                            {isLoadingLocation ? "Analyzing IP address..." : `${userCity}, ${userCountry}`}
+                          </p>
+                        </div>
                       </div>
-                      <div className="flex-1">
-                        <p className="text-sm text-green-400 font-medium">
-                          {isLoadingLocation ? "Detecting location..." : "Suspicious Location Found"}
-                        </p>
-                        <p className="text-xs text-gray-400">
-                          {isLoadingLocation ? "Analyzing IP address..." : `${userCity}, ${userCountry}`}
-                        </p>
-                      </div>
+                      
+                      {/* Map Display - Only show after phone number is entered */}
+                      {userCoords && !isLoadingLocation && investigatedPhone.split(" ")[1]?.length >= 8 && (
+                        <div className="relative w-full h-32 rounded-lg overflow-hidden border border-gray-600">
+                          <iframe
+                            src={`https://www.openstreetmap.org/export/embed.html?bbox=${userCoords.lng - 0.05}%2C${userCoords.lat - 0.03}%2C${userCoords.lng + 0.05}%2C${userCoords.lat + 0.03}&layer=mapnik&marker=${userCoords.lat}%2C${userCoords.lng}`}
+                            className="w-full h-full border-0"
+                            style={{ filter: "hue-rotate(180deg) invert(90%)" }}
+                          />
+                          <div className="absolute top-2 left-2 bg-red-600/90 px-2 py-1 rounded text-xs font-bold text-white animate-pulse">
+                            LIVE TRACKING
+                          </div>
+                          <div className="absolute bottom-2 right-2 bg-black/70 px-2 py-1 rounded text-xs text-gray-300">
+                            {userCoords.lat.toFixed(4)}, {userCoords.lng.toFixed(4)}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
