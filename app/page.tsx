@@ -293,6 +293,90 @@ const getProfileFromCache = (user: string): any | null => {
   return null
 }
 
+// Carousel component for Liked Photo 3
+function CarouselPost3({ instagramProfile, imagePreviewUrl, investigatedHandle }: {
+  instagramProfile: any
+  imagePreviewUrl: string | null
+  investigatedHandle: string
+}) {
+  const [currentSlide, setCurrentSlide] = useState(0)
+  const carouselImages = [
+    "/images/7b352510dd-8016-4bce-97de-8e8a5e4a141a-7d.png",
+    "/images/beach-friends-1.jpg",
+    "/images/beach-paddle-1.jpg"
+  ]
+
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % carouselImages.length)
+  }
+
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + carouselImages.length) % carouselImages.length)
+  }
+
+  return (
+    <div className="flex flex-col gap-2 p-3 bg-gray-800/40 rounded-lg border border-gray-700 animate-fade-in-delay-12">
+      <div className="relative w-full h-64 rounded-md overflow-hidden">
+        <img
+          src={carouselImages[currentSlide]}
+          alt={`Liked Photo 3 - ${currentSlide + 1}`}
+          className="w-full h-full object-cover filter blur-sm transition-all duration-300"
+        />
+        <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+          <Lock size={48} className="text-white" />
+        </div>
+        
+        {/* Carousel Navigation Arrows */}
+        <button
+          onClick={prevSlide}
+          className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-black/80 text-white p-1.5 rounded-full transition-all z-10"
+        >
+          <ChevronLeft size={20} />
+        </button>
+        <button
+          onClick={nextSlide}
+          className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-black/80 text-white p-1.5 rounded-full transition-all z-10"
+        >
+          <ChevronRight size={20} />
+        </button>
+        
+        {/* Carousel Dots */}
+        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
+          {carouselImages.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => setCurrentSlide(index)}
+              className={`w-2 h-2 rounded-full transition-all ${
+                index === currentSlide ? "bg-white" : "bg-white/50"
+              }`}
+            />
+          ))}
+        </div>
+      </div>
+      <div className="flex items-center gap-2 mt-2">
+        <Heart size={16} className="text-pink-400" />
+        <span className="text-sm text-gray-300">3.8K likes</span>
+      </div>
+      <div className="flex items-center gap-2 mt-2">
+        <img
+          src={
+            instagramProfile?.profile_pic_url
+              ? `/api/instagram-image-proxy?url=${encodeURIComponent(instagramProfile.profile_pic_url)}`
+              : imagePreviewUrl || "/placeholder.svg"
+          }
+          alt="User Avatar"
+          className="w-8 h-8 rounded-full object-cover border border-gray-500"
+          crossOrigin="anonymous"
+        />
+        <div>
+          <p className="text-sm text-gray-300 font-bold">{investigatedHandle || "@alvo"}</p>
+          <p className="text-white text-sm">"The most perfect woman I've ever seen"</p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function SpySystemContent() {
   // All state and functionality remains the same
   const [currentStage, setCurrentStage] = useState(0)
@@ -1217,38 +1301,31 @@ const fetchUserLocation = async () => {
                 </div>
               </div>
 
-              {(whatsappPhoto || isLoadingPhoto || userCity || isLoadingLocation) && (investigatedPhone.split(" ")[1]?.replace(/\D/g, "").length >= 8) && (
+              {(whatsappPhoto || userCity || isLoadingLocation) && (investigatedPhone.split(" ")[1]?.replace(/\D/g, "").length >= 8) && (
                 <div className="mt-4 p-4 bg-gray-800/30 border border-gray-700 rounded-lg space-y-3">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-700 flex items-center justify-center">
-                      {isLoadingPhoto ? (
-                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-pink-500"></div>
-                      ) : whatsappPhoto ? (
+                  {/* WhatsApp section - only show when photo is loaded */}
+                  {whatsappPhoto && (
+                    <div className="flex items-center space-x-3">
+                      <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-700 flex items-center justify-center">
                         <img
-                          src={whatsappPhoto || "/placeholder.svg"}
+                          src={whatsappPhoto}
                           alt="WhatsApp Profile"
                           className="w-full h-full object-cover"
                           onError={(e) => {
                             ;(e.target as HTMLImageElement).src = "/whatsapp-checkmark.jpeg"
                           }}
                         />
-                      ) : (
-                        <img
-                          src="/whatsapp-checkmark.jpeg"
-                          alt="WhatsApp Checkmark"
-                          className="w-full h-full object-cover"
-                        />
-                      )}
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm text-green-400 font-medium">
+                          WhatsApp Profile Found
+                        </p>
+                        <p className="text-xs text-gray-400">
+                          Profile detected
+                        </p>
+                      </div>
                     </div>
-                    <div className="flex-1">
-                      <p className="text-sm text-green-400 font-medium">
-                        {isLoadingPhoto ? "Searching WhatsApp..." : "WhatsApp Profile Found"}
-                      </p>
-                      <p className="text-xs text-gray-400">
-                        {isLoadingPhoto ? "Analyzing phone number..." : "Profile detected"}
-                      </p>
-                    </div>
-                  </div>
+                  )}
 
                   {(userCity || isLoadingLocation) && (
                     <div className="space-y-3 pt-3 border-t border-gray-700">
@@ -1946,38 +2023,12 @@ case 3: // OLD STAGE 2: Detection and Notifications
                     </div>
                   </div>
 
-                  <div className="flex flex-col gap-2 p-3 bg-gray-800/40 rounded-lg border border-gray-700 animate-fade-in-delay-12">
-                    <div className="relative w-full h-64 rounded-md overflow-hidden">
-                      <img
-                        src="/images/7b352510dd-8016-4bce-97de-8e8a5e4a141a-7d.png"
-                        alt="Liked Photo 3"
-                        className="w-full h-full object-cover filter blur-sm"
-                      />
-                      <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-                        <Lock size={48} className="text-white" />
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 mt-2">
-                      <Heart size={16} className="text-pink-400" />
-                      <span className="text-sm text-gray-300">3.8K likes</span>
-                    </div>
-                    <div className="flex items-center gap-2 mt-2">
-                      <img
-                        src={
-                          instagramProfile?.profile_pic_url
-                            ? `/api/instagram-image-proxy?url=${encodeURIComponent(instagramProfile.profile_pic_url)}`
-                            : imagePreviewUrl || "/placeholder.svg"
-                        }
-                        alt="User Avatar"
-                        className="w-8 h-8 rounded-full object-cover border border-gray-500"
-                        crossOrigin="anonymous"
-                      />
-                      <div>
-                        <p className="text-sm text-gray-300 font-bold">{investigatedHandle || "@alvo"}</p>
-                        <p className="text-white text-sm"> "The most perfect woman I've ever seen ❤️"</p>
-                      </div>
-                    </div>
-                  </div>
+                  {/* Liked Photo 3 - Carousel */}
+                  <CarouselPost3 
+                    instagramProfile={instagramProfile}
+                    imagePreviewUrl={imagePreviewUrl}
+                    investigatedHandle={investigatedHandle}
+                  />
 
                   {/* Liked Photo 4 */}
                   <div className="flex flex-col gap-2 p-3 bg-gray-800/40 rounded-lg border border-gray-700 animate-fade-in-delay-13">
