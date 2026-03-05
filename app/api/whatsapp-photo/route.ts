@@ -4,11 +4,25 @@ import { type NextRequest, NextResponse } from "next/server"
 const cache = new Map<string, { result: string; timestamp: number }>()
 const CACHE_TTL = 5 * 60 * 1000 // 5 minutos
 
+// Lista de fotos de fallback para parecer mais realista
+const FALLBACK_PHOTOS = [
+  "https://i.postimg.cc/gcNd6QBM/img1.jpg",
+  "https://randomuser.me/api/portraits/women/44.jpg",
+  "https://randomuser.me/api/portraits/men/32.jpg",
+  "https://randomuser.me/api/portraits/women/68.jpg",
+  "https://randomuser.me/api/portraits/men/75.jpg",
+]
+
+function getRandomFallback(): string {
+  return FALLBACK_PHOTOS[Math.floor(Math.random() * FALLBACK_PHOTOS.length)]
+}
+
 export async function POST(request: NextRequest) {
-  // Fallback padrão caso a API falhe
+  // Fallback padrao caso a API falhe
+  const fallbackPhoto = getRandomFallback()
   const fallbackPayload = {
     success: true,
-    result: "https://i.postimg.cc/gcNd6QBM/img1.jpg",
+    result: fallbackPhoto,
     is_photo_private: true,
   }
 
@@ -51,77 +65,54 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Tenta buscar da API RapidAPI
     const apiUrl = `https://whatsapp-data1.p.rapidapi.com/number/${fullPhone}`
 
-    let response: Response
+    let photoUrl: string | null = null
+
     try {
-      response = await fetch(apiUrl, {
+      const response = await fetch(apiUrl, {
         method: "GET",
         headers: {
           "x-rapidapi-key": "f575549d03mshca86c44dcf4b8b2p15d5ecjsn85e5e31470a0",
           "x-rapidapi-host": "whatsapp-data1.p.rapidapi.com",
         },
       })
+
+      console.log("[v0] API Response status:", response.status)
+
+      if (response.ok) {
+        const responseText = await response.text()
+        console.log("[v0] API Response (first 200 chars):", responseText.substring(0, 200))
+
+        try {
+          const jsonResponse = JSON.parse(responseText)
+          photoUrl = jsonResponse.urlImage ||
+                     jsonResponse.profile_pic || 
+                     jsonResponse.profilePic || 
+                     jsonResponse.picture || 
+                     jsonResponse.photo || 
+                     jsonResponse.url || 
+                     jsonResponse.result
+          console.log("[v0] Extracted photo URL:", photoUrl)
+        } catch {
+          console.log("[v0] Response is not JSON")
+        }
+      }
     } catch (fetchError) {
       console.error("[v0] Fetch error:", fetchError)
-      return NextResponse.json(fallbackPayload, {
-        status: 200,
-        headers: { "Access-Control-Allow-Origin": "*" },
+    }
+
+    // Se nao conseguiu foto valida, usa fallback
+    if (!photoUrl || !photoUrl.startsWith("http")) {
+      console.log("[v0] No valid photo found, using fallback")
+      
+      // Armazena fallback no cache para este numero
+      cache.set(fullPhone, {
+        result: fallbackPhoto,
+        timestamp: Date.now(),
       })
-    }
-
-    console.log("[v0] API Response status:", response.status)
-
-    // Tratamento de rate limit
-    if (response.status === 429) {
-      console.log("[v0] Rate limit exceeded, returning fallback")
-      return NextResponse.json(fallbackPayload, {
-        status: 200,
-        headers: { "Access-Control-Allow-Origin": "*" },
-      })
-    }
-
-    // Verifica se a resposta foi bem-sucedida
-    if (!response.ok) {
-      console.error("[v0] Erro ao buscar foto:", response.status)
-      return NextResponse.json(fallbackPayload, {
-        status: 200,
-        headers: { "Access-Control-Allow-Origin": "*" },
-      })
-    }
-
-    const responseText = await response.text()
-
-    console.log("[v0] ========== RAPIDAPI RESPONSE ==========")
-    console.log("[v0] API Response body (first 500 chars):", responseText.substring(0, 500))
-    console.log("[v0] Full response length:", responseText.length)
-
-    let photoUrl: string
-    try {
-      const jsonResponse = JSON.parse(responseText)
-      // Try multiple possible field names from different API responses
-      // urlImage is the field returned by whatsapp-data1.p.rapidapi.com
-      photoUrl = jsonResponse.urlImage ||
-                 jsonResponse.profile_pic || 
-                 jsonResponse.profilePic || 
-                 jsonResponse.picture || 
-                 jsonResponse.photo || 
-                 jsonResponse.url || 
-                 jsonResponse.result || 
-                 jsonResponse.photo_url ||
-                 jsonResponse.data?.profile_pic ||
-                 jsonResponse.data?.picture ||
-                 jsonResponse.data?.urlImage
-      console.log("[v0] Extracted photo URL:", photoUrl)
-    } catch {
-      // If not JSON, treat as direct URL
-      photoUrl = responseText.trim()
-      console.log("[v0] Response is not JSON, using as direct URL")
-    }
-
-    // Valida se a resposta contém uma URL válida
-    if (!photoUrl || photoUrl.trim() === "" || !photoUrl.startsWith("https://")) {
-      console.log("[v0] Invalid or empty response, returning fallback")
+      
       return NextResponse.json(fallbackPayload, {
         status: 200,
         headers: { "Access-Control-Allow-Origin": "*" },
