@@ -478,13 +478,15 @@ function SpySystemContent() {
   ]
 
   // Check for search limit on mount
+  // TEMPORARILY DISABLED FOR TESTING
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const existingLimit = getSearchLimitData()
-      if (existingLimit) {
-        setLimitData(existingLimit)
-        setShowLimitReached(true)
-      }
+      localStorage.removeItem("instacheck_search_limit")
+      // const existingLimit = getSearchLimitData()
+      // if (existingLimit) {
+      //   setLimitData(existingLimit)
+      //   setShowLimitReached(true)
+      // }
     }
   }, [])
 
@@ -1541,6 +1543,40 @@ case 2: // OLD STAGE 1: Upload and Handle
                     )}
                   </div>
                 </div>
+                
+                {/* Real Instagram Posts Grid */}
+                {instagramPosts && instagramPosts.length > 0 && (
+                  <div className="mt-4 pt-4 border-t border-gray-700">
+                    <p className="text-xs text-purple-400 font-medium mb-2">Recent Posts</p>
+                    <div className="grid grid-cols-3 gap-1.5">
+                      {instagramPosts.slice(0, 6).map((post: any, index: number) => (
+                        <div key={post.id || index} className="relative aspect-square rounded overflow-hidden">
+                          <img
+                            src={`/api/instagram-image-proxy?url=${encodeURIComponent(post.media_url)}`}
+                            alt={`Post ${index + 1}`}
+                            className="w-full h-full object-cover filter blur-[2px]"
+                            crossOrigin="anonymous"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = "/placeholder.svg"
+                            }}
+                          />
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+                            <Lock size={14} className="text-white/80" />
+                          </div>
+                          <div className="absolute bottom-0.5 left-0.5 flex items-center gap-0.5 bg-black/60 px-1 py-0.5 rounded text-[10px]">
+                            <Heart size={8} className="text-pink-400" />
+                            <span className="text-white">{post.like_count > 1000 ? `${(post.like_count / 1000).toFixed(1)}K` : post.like_count}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    {instagramProfile?.is_private && (
+                      <p className="text-[10px] text-yellow-400/70 flex items-center gap-1 mt-2">
+                        <Lock size={10} /> Private - Limited access
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
             )}
 
