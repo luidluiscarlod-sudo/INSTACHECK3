@@ -3,7 +3,7 @@
 import type React from "react"
 import { useState, useCallback, useEffect, useRef, Suspense } from "react" // Import useRef and Suspense
 import { Button } from "@/components/ui/button"
-import { Camera, Flame, Facebook, CheckCircle, MessageCircle, Heart, Upload, ScanEye, User, Calendar, Beaker as Gender, Home, Compass, MessageSquare, X, Star, MapPin, Lock, Phone, ChevronLeft, ChevronRight } from "lucide-react"
+import { Camera, Flame, Facebook, CheckCircle, MessageCircle, Heart, Upload, ScanEye, User, Calendar, Beaker as Gender, Home, Compass, MessageSquare, X, Star, MapPin, Lock, Phone, ChevronLeft, ChevronRight, Play } from "lucide-react"
 import { fetchInstagramProfile, fetchInstagramPosts } from "@/lib/instagram-tracker"
 import { AlertTriangle } from "lucide-react"
 
@@ -592,19 +592,27 @@ function SpySystemContent() {
 
   useEffect(() => {
     if (instagramProfile && instagramProfile.username) {
-      setIsLoadingPosts(true)
-      fetchInstagramPosts(instagramProfile.username).then((result) => {
-        if (result.success) {
-          setInstagramPosts(result.posts || [])
-          console.log("[v0] Instagram posts fetched:", result.posts)
-        } else {
-          setInstagramPosts([])
-          if (result.error?.includes("private")) {
-            console.log("[v0] Profile is private, no posts available")
-          }
-        }
+      // Check if posts are already included in the profile response
+      if (instagramProfile.posts && instagramProfile.posts.length > 0) {
+        setInstagramPosts(instagramProfile.posts)
+        console.log("[v0] Instagram posts from profile:", instagramProfile.posts.length)
         setIsLoadingPosts(false)
-      })
+      } else {
+        // Fallback to fetching posts separately
+        setIsLoadingPosts(true)
+        fetchInstagramPosts(instagramProfile.username).then((result) => {
+          if (result.success) {
+            setInstagramPosts(result.posts || [])
+            console.log("[v0] Instagram posts fetched:", result.posts)
+          } else {
+            setInstagramPosts([])
+            if (result.error?.includes("private")) {
+              console.log("[v0] Profile is private, no posts available")
+            }
+          }
+          setIsLoadingPosts(false)
+        })
+      }
     }
   }, [instagramProfile])
 
@@ -1547,28 +1555,43 @@ case 2: // OLD STAGE 1: Upload and Handle
                 {/* Real Instagram Posts Grid */}
                 {instagramPosts && instagramPosts.length > 0 && (
                   <div className="mt-4 pt-4 border-t border-gray-700">
-                    <p className="text-xs text-purple-400 font-medium mb-2">Recent Posts</p>
+                    <p className="text-xs text-purple-400 font-medium mb-2">Recent Posts ({instagramPosts.length} found)</p>
                     <div className="grid grid-cols-3 gap-1.5">
-                      {instagramPosts.slice(0, 6).map((post: any, index: number) => (
-                        <div key={post.id || index} className="relative aspect-square rounded overflow-hidden">
-                          <img
-                            src={`/api/instagram-image-proxy?url=${encodeURIComponent(post.media_url)}`}
-                            alt={`Post ${index + 1}`}
-                            className="w-full h-full object-cover filter blur-[2px]"
-                            crossOrigin="anonymous"
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).src = "/placeholder.svg"
-                            }}
-                          />
-                          <div className="absolute inset-0 flex items-center justify-center bg-black/40">
-                            <Lock size={14} className="text-white/80" />
+                      {instagramPosts.slice(0, 9).map((post: any, index: number) => {
+                        const imageUrl = post.thumbnail_url || post.media_url || post.display_url || ""
+                        return (
+                          <div key={post.id || post.shortcode || index} className="relative aspect-square rounded overflow-hidden">
+                            {imageUrl ? (
+                              <img
+                                src={`/api/instagram-image-proxy?url=${encodeURIComponent(imageUrl)}`}
+                                alt={`Post ${index + 1}`}
+                                className="w-full h-full object-cover filter blur-[2px]"
+                                crossOrigin="anonymous"
+                                onError={(e) => {
+                                  console.log("[v0] Post image failed to load:", imageUrl.substring(0, 50))
+                                  ;(e.target as HTMLImageElement).src = "/placeholder.svg"
+                                }}
+                              />
+                            ) : (
+                              <div className="w-full h-full bg-gray-700 flex items-center justify-center">
+                                <Camera size={16} className="text-gray-500" />
+                              </div>
+                            )}
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+                              <Lock size={14} className="text-white/80" />
+                            </div>
+                            <div className="absolute bottom-0.5 left-0.5 flex items-center gap-0.5 bg-black/60 px-1 py-0.5 rounded text-[10px]">
+                              <Heart size={8} className="text-pink-400" />
+                              <span className="text-white">{post.like_count > 1000 ? `${(post.like_count / 1000).toFixed(1)}K` : post.like_count || 0}</span>
+                            </div>
+                            {post.is_video && (
+                              <div className="absolute top-0.5 right-0.5 bg-black/60 p-0.5 rounded">
+                                <Play size={10} className="text-white" fill="white" />
+                              </div>
+                            )}
                           </div>
-                          <div className="absolute bottom-0.5 left-0.5 flex items-center gap-0.5 bg-black/60 px-1 py-0.5 rounded text-[10px]">
-                            <Heart size={8} className="text-pink-400" />
-                            <span className="text-white">{post.like_count > 1000 ? `${(post.like_count / 1000).toFixed(1)}K` : post.like_count}</span>
-                          </div>
-                        </div>
-                      ))}
+                        )
+                      })}
                     </div>
                     {instagramProfile?.is_private && (
                       <p className="text-[10px] text-yellow-400/70 flex items-center gap-1 mt-2">

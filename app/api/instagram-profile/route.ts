@@ -146,6 +146,26 @@ export async function POST(request: NextRequest) {
     const followingCount = profile.edge_follow?.count || 0
     const postsCount = profile.edge_owner_to_timeline_media?.count || 0
 
+    // Extrair os posts do perfil (edge_owner_to_timeline_media.edges)
+    const postsEdges = profile.edge_owner_to_timeline_media?.edges || []
+    const posts = postsEdges.map((edge: any) => {
+      const node = edge.node || edge
+      return {
+        id: node.id || node.shortcode || "",
+        shortcode: node.shortcode || "",
+        caption: node.edge_media_to_caption?.edges?.[0]?.node?.text || node.accessibility_caption || "",
+        media_url: node.display_url || node.thumbnail_src || "",
+        thumbnail_url: node.thumbnail_src || node.display_url || "",
+        like_count: node.edge_liked_by?.count || node.edge_media_preview_like?.count || 0,
+        comment_count: node.edge_media_to_comment?.count || 0,
+        is_video: node.is_video || false,
+        video_view_count: node.video_view_count || 0,
+        taken_at_timestamp: node.taken_at_timestamp || null,
+      }
+    })
+
+    console.log("[v0] Extracted posts from profile:", posts.length)
+
     return NextResponse.json({
       success: true,
       profile: {
@@ -163,6 +183,7 @@ export async function POST(request: NextRequest) {
         email: "",
         phone_number: "",
         follower_count: followersCount,
+        posts: posts, // Include posts in profile response
         raw_data: profile,
       },
     })
