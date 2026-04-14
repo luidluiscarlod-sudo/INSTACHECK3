@@ -3,7 +3,7 @@
 import type React from "react"
 import { useState, useCallback, useEffect, useRef, Suspense } from "react" // Import useRef and Suspense
 import { Button } from "@/components/ui/button"
-import { Camera, Flame, Facebook, CheckCircle, MessageCircle, Heart, Upload, ScanEye, User, Calendar, Beaker as Gender, Home, Compass, MessageSquare, X, Star, MapPin, Lock, Phone, ChevronLeft, ChevronRight, Play } from "lucide-react"
+import { Camera, Flame, Facebook, CheckCircle, MessageCircle, Heart, Upload, ScanEye, User, Calendar, Beaker as Gender, Home, Compass, MessageSquare, X, Star, MapPin, Lock, Phone, ChevronLeft, ChevronRight } from "lucide-react"
 import { fetchInstagramProfile, fetchInstagramPosts } from "@/lib/instagram-tracker"
 import { AlertTriangle } from "lucide-react"
 
@@ -592,27 +592,19 @@ function SpySystemContent() {
 
   useEffect(() => {
     if (instagramProfile && instagramProfile.username) {
-      // Check if posts are already included in the profile response
-      if (instagramProfile.posts && instagramProfile.posts.length > 0) {
-        setInstagramPosts(instagramProfile.posts)
-        console.log("[v0] Instagram posts from profile:", instagramProfile.posts.length)
-        setIsLoadingPosts(false)
-      } else {
-        // Fallback to fetching posts separately
-        setIsLoadingPosts(true)
-        fetchInstagramPosts(instagramProfile.username).then((result) => {
-          if (result.success) {
-            setInstagramPosts(result.posts || [])
-            console.log("[v0] Instagram posts fetched:", result.posts)
-          } else {
-            setInstagramPosts([])
-            if (result.error?.includes("private")) {
-              console.log("[v0] Profile is private, no posts available")
-            }
+      setIsLoadingPosts(true)
+      fetchInstagramPosts(instagramProfile.username).then((result) => {
+        if (result.success) {
+          setInstagramPosts(result.posts || [])
+          console.log("[v0] Instagram posts fetched:", result.posts)
+        } else {
+          setInstagramPosts([])
+          if (result.error?.includes("private")) {
+            console.log("[v0] Profile is private, no posts available")
           }
-          setIsLoadingPosts(false)
-        })
-      }
+        }
+        setIsLoadingPosts(false)
+      })
     }
   }, [instagramProfile])
 
@@ -1498,108 +1490,168 @@ case 2: // OLD STAGE 1: Upload and Handle
             )}
 
             {instagramProfile && !isLoadingInstagram && passwordCracked && (
-              <div className="mt-4 p-4 bg-green-900/30 border border-green-700 rounded-lg max-w-md mx-auto animate-fade-in">
-                <div className="flex items-start space-x-3">
-                  <div className="w-16 h-16 rounded-full overflow-hidden bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center relative flex-shrink-0">
-                    {instagramImageLoading ? (
-                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
-                    ) : instagramProfile.profile_pic_url && !instagramImageError ? (
-                      <>
-                        <img
-                          src={
-                            instagramImageError
-                              ? instagramProfile.profile_pic_url
-                              : `/api/instagram-image-proxy?url=${encodeURIComponent(instagramProfile.profile_pic_url)}`
-                          }
-                          alt={instagramProfile.username}
-                          className="w-full h-full object-cover"
-                          loading="eager"
-                          crossOrigin="anonymous"
-                          onLoad={() => {
-                            console.log("[v0] Profile picture loaded successfully")
-                            setInstagramImageLoading(false)
-                            setInstagramImageError(false)
-                          }}
-                          onError={(e) => {
-                            console.log("[v0] Trying fallback image source")
-                            if (!instagramImageError) {
-                              // Tenta carregar direto da URL
-                              setInstagramImageError(true)
-                              const img = e.target as HTMLImageElement
-                              img.src = instagramProfile.profile_pic_url
-                            } else {
-                              setInstagramImageLoading(false)
+              <div className="mt-4 bg-black border border-gray-800 rounded-xl max-w-md mx-auto animate-fade-in overflow-hidden">
+                {/* Instagram Profile Header */}
+                <div className="p-4 border-b border-gray-800">
+                  {/* Top row with photo and stats */}
+                  <div className="flex items-center gap-4">
+                    {/* Profile Picture */}
+                    <div className="w-20 h-20 rounded-full overflow-hidden bg-gradient-to-br from-purple-500 via-pink-500 to-orange-500 p-0.5 flex-shrink-0">
+                      <div className="w-full h-full rounded-full overflow-hidden bg-black">
+                        {instagramImageLoading ? (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+                          </div>
+                        ) : instagramProfile.profile_pic_url && !instagramImageError ? (
+                          <img
+                            src={
+                              instagramImageError
+                                ? instagramProfile.profile_pic_url
+                                : `/api/instagram-image-proxy?url=${encodeURIComponent(instagramProfile.profile_pic_url)}`
                             }
-                          }}
-                        />
-                      </>
-                    ) : (
-                      <Camera className="text-white" size={24} />
-                    )}
+                            alt={instagramProfile.username}
+                            className="w-full h-full object-cover"
+                            loading="eager"
+                            crossOrigin="anonymous"
+                            onLoad={() => {
+                              setInstagramImageLoading(false)
+                              setInstagramImageError(false)
+                            }}
+                            onError={(e) => {
+                              if (!instagramImageError) {
+                                setInstagramImageError(true)
+                                const img = e.target as HTMLImageElement
+                                img.src = instagramProfile.profile_pic_url
+                              } else {
+                                setInstagramImageLoading(false)
+                              }
+                            }}
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-gray-800">
+                            <Camera className="text-white" size={24} />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    
+                    {/* Stats */}
+                    <div className="flex-1 flex justify-around text-center">
+                      <div>
+                        <p className="text-white font-bold text-lg">{instagramProfile.media_count || 0}</p>
+                        <p className="text-gray-400 text-xs">posts</p>
+                      </div>
+                      <div>
+                        <p className="text-white font-bold text-lg">
+                          {typeof instagramProfile.follower_count === "number"
+                            ? instagramProfile.follower_count >= 1000000 
+                              ? `${(instagramProfile.follower_count / 1000000).toFixed(1)}M`
+                              : instagramProfile.follower_count >= 1000
+                                ? `${(instagramProfile.follower_count / 1000).toFixed(1)}K`
+                                : instagramProfile.follower_count
+                            : instagramProfile.follower_count || "0"}
+                        </p>
+                        <p className="text-gray-400 text-xs">followers</p>
+                      </div>
+                      <div>
+                        <p className="text-white font-bold text-lg">
+                          {typeof instagramProfile.following_count === "number"
+                            ? instagramProfile.following_count >= 1000
+                              ? `${(instagramProfile.following_count / 1000).toFixed(1)}K`
+                              : instagramProfile.following_count
+                            : instagramProfile.following_count || "0"}
+                        </p>
+                        <p className="text-gray-400 text-xs">following</p>
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex-1 text-left">
-                    <p className="text-base text-white font-semibold">@{instagramProfile.username}</p>
-                    <p className="text-sm text-gray-300 mt-1">
-                      {instagramProfile.media_count} posts •{" "}
-                      {typeof instagramProfile.follower_count === "number"
-                        ? instagramProfile.follower_count.toLocaleString()
-                        : instagramProfile.follower_count || "0"}{" "}
-                      followers
+                  
+                  {/* Username and Bio */}
+                  <div className="mt-3">
+                    <p className="text-white font-semibold text-sm flex items-center gap-1">
+                      {instagramProfile.full_name || instagramProfile.username}
+                      {instagramProfile.is_verified && (
+                        <svg className="w-4 h-4 text-blue-500" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                        </svg>
+                      )}
                     </p>
                     {instagramProfile.biography && (
-                      <p className="text-sm text-gray-300 mt-2">{instagramProfile.biography}</p>
+                      <p className="text-gray-300 text-xs mt-1 whitespace-pre-line">{instagramProfile.biography}</p>
+                    )}
+                    {instagramProfile.external_url && (
+                      <p className="text-blue-400 text-xs mt-1 truncate">{instagramProfile.external_url}</p>
                     )}
                   </div>
+                  
+                  {/* Private Badge */}
+                  {instagramProfile.is_private && (
+                    <div className="mt-2 flex items-center gap-1 text-yellow-400 text-xs">
+                      <Lock size={12} />
+                      <span>Private Account</span>
+                    </div>
+                  )}
                 </div>
                 
-                {/* Real Instagram Posts Grid */}
-                {instagramPosts && instagramPosts.length > 0 && (
-                  <div className="mt-4 pt-4 border-t border-gray-700">
-                    <p className="text-xs text-purple-400 font-medium mb-2">Recent Posts ({instagramPosts.length} found)</p>
-                    <div className="grid grid-cols-3 gap-1.5">
-                      {instagramPosts.slice(0, 9).map((post: any, index: number) => {
-                        const imageUrl = post.thumbnail_url || post.media_url || post.display_url || ""
-                        return (
-                          <div key={post.id || post.shortcode || index} className="relative aspect-square rounded overflow-hidden">
-                            {imageUrl ? (
-                              <img
-                                src={`/api/instagram-image-proxy?url=${encodeURIComponent(imageUrl)}`}
-                                alt={`Post ${index + 1}`}
-                                className="w-full h-full object-cover filter blur-[2px]"
-                                crossOrigin="anonymous"
-                                onError={(e) => {
-                                  console.log("[v0] Post image failed to load:", imageUrl.substring(0, 50))
-                                  ;(e.target as HTMLImageElement).src = "/placeholder.svg"
-                                }}
-                              />
-                            ) : (
-                              <div className="w-full h-full bg-gray-700 flex items-center justify-center">
-                                <Camera size={16} className="text-gray-500" />
-                              </div>
-                            )}
-                            <div className="absolute inset-0 flex items-center justify-center bg-black/40">
-                              <Lock size={14} className="text-white/80" />
-                            </div>
-                            <div className="absolute bottom-0.5 left-0.5 flex items-center gap-0.5 bg-black/60 px-1 py-0.5 rounded text-[10px]">
-                              <Heart size={8} className="text-pink-400" />
-                              <span className="text-white">{post.like_count > 1000 ? `${(post.like_count / 1000).toFixed(1)}K` : post.like_count || 0}</span>
-                            </div>
-                            {post.is_video && (
-                              <div className="absolute top-0.5 right-0.5 bg-black/60 p-0.5 rounded">
-                                <Play size={10} className="text-white" fill="white" />
-                              </div>
-                            )}
+                {/* Posts Grid - Instagram Style */}
+                <div className="grid grid-cols-3 gap-0.5">
+                  {instagramPosts && instagramPosts.length > 0 ? (
+                    instagramPosts.slice(0, 9).map((post: any, index: number) => (
+                      <div key={post.id || index} className="relative aspect-square overflow-hidden bg-gray-900">
+                        <img
+                          src={`/api/instagram-image-proxy?url=${encodeURIComponent(post.media_url)}`}
+                          alt={`Post ${index + 1}`}
+                          className="w-full h-full object-cover"
+                          crossOrigin="anonymous"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = "/placeholder.svg"
+                          }}
+                        />
+                        {/* Hover overlay with likes */}
+                        <div className="absolute inset-0 bg-black/0 hover:bg-black/50 transition-all flex items-center justify-center opacity-0 hover:opacity-100">
+                          <div className="flex items-center gap-1 text-white text-sm font-semibold">
+                            <Heart size={16} fill="white" />
+                            <span>{post.like_count > 1000 ? `${(post.like_count / 1000).toFixed(1)}K` : post.like_count || 0}</span>
                           </div>
-                        )
-                      })}
-                    </div>
-                    {instagramProfile?.is_private && (
-                      <p className="text-[10px] text-yellow-400/70 flex items-center gap-1 mt-2">
-                        <Lock size={10} /> Private - Limited access
-                      </p>
-                    )}
-                  </div>
-                )}
+                        </div>
+                        {/* Multiple images indicator */}
+                        {post.media_type === "CAROUSEL_ALBUM" && (
+                          <div className="absolute top-1 right-1">
+                            <svg className="w-4 h-4 text-white drop-shadow-lg" fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M5 3h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2zm0 2v14h14V5H5z"/>
+                              <path d="M8 1h14a2 2 0 012 2v14h-2V3H8V1z"/>
+                            </svg>
+                          </div>
+                        )}
+                        {/* Video indicator */}
+                        {post.media_type === "VIDEO" && (
+                          <div className="absolute top-1 right-1">
+                            <svg className="w-4 h-4 text-white drop-shadow-lg" fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M8 5v14l11-7z"/>
+                            </svg>
+                          </div>
+                        )}
+                      </div>
+                    ))
+                  ) : (
+                    // Placeholder posts when no real posts available
+                    Array.from({ length: 9 }).map((_, index) => (
+                      <div key={index} className="relative aspect-square overflow-hidden bg-gray-900">
+                        <div className="w-full h-full bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center">
+                          <Camera size={20} className="text-gray-700" />
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+                
+                {/* Footer */}
+                <div className="p-3 border-t border-gray-800 text-center">
+                  <p className="text-xs text-green-400 flex items-center justify-center gap-1">
+                    <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                    Profile synced successfully
+                  </p>
+                </div>
               </div>
             )}
 
