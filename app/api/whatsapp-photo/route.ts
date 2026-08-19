@@ -65,42 +65,45 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Tenta buscar da API RapidAPI
-    const apiUrl = `https://whatsapp-data1.p.rapidapi.com/number/${fullPhone}`
-
+    // Busca a foto pela API WhatsApp Profile Photo With Token da RapidAPI
+    const apiUrl = "https://whatsapp-profile-data1.p.rapidapi.com/WhatsappProfilePhotoWithToken"
     let photoUrl: string | null = null
 
     try {
       const response = await fetch(apiUrl, {
-        method: "GET",
+        method: "POST",
         headers: {
-          "x-rapidapi-key": "f575549d03mshca86c44dcf4b8b2p15d5ecjsn85e5e31470a0",
-          "x-rapidapi-host": "whatsapp-data1.p.rapidapi.com",
+          "x-rapidapi-key": process.env.RAPIDAPI_KEY ?? "",
+          "x-rapidapi-host": "whatsapp-profile-data1.p.rapidapi.com",
+          "Content-Type": "application/json",
         },
+        body: JSON.stringify({
+          phone_number: fullPhone,
+        }),
       })
 
-      console.log("[v0] API Response status:", response.status)
+      console.log("[v0] WhatsApp profile API response status:", response.status)
 
       if (response.ok) {
-        const responseText = await response.text()
-        console.log("[v0] API Response (first 200 chars):", responseText.substring(0, 200))
+        const jsonResponse = await response.json()
+        console.log("[v0] WhatsApp profile API response received")
 
-        try {
-          const jsonResponse = JSON.parse(responseText)
-          photoUrl = jsonResponse.urlImage ||
-                     jsonResponse.profile_pic || 
-                     jsonResponse.profilePic || 
-                     jsonResponse.picture || 
-                     jsonResponse.photo || 
-                     jsonResponse.url || 
-                     jsonResponse.result
-          console.log("[v0] Extracted photo URL:", photoUrl)
-        } catch {
-          console.log("[v0] Response is not JSON")
-        }
+        photoUrl = typeof jsonResponse === "string"
+          ? jsonResponse
+          : jsonResponse.urlImage ||
+            jsonResponse.profile_pic ||
+            jsonResponse.profilePic ||
+            jsonResponse.picture ||
+            jsonResponse.photo ||
+            jsonResponse.url ||
+            jsonResponse.result ||
+            jsonResponse.data?.urlImage ||
+            jsonResponse.data?.photo ||
+            jsonResponse.data?.url ||
+            jsonResponse.data?.result
       }
     } catch (fetchError) {
-      console.error("[v0] Fetch error:", fetchError)
+      console.error("[v0] WhatsApp profile API fetch error:", fetchError)
     }
 
     // Se nao conseguiu foto valida, usa fallback
