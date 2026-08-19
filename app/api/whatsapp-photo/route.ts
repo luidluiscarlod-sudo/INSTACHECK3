@@ -73,7 +73,9 @@ export async function POST(request: NextRequest) {
       const response = await fetch(apiUrl, {
         method: "POST",
         headers: {
-          "x-rapidapi-key": process.env.RAPIDAPI_KEY ?? "",
+          // A API fornecida usa o cabeçalho de autenticação salvo no ambiente.
+          Authorization: process.env.CURL_AUTH_HEADER ?? "",
+          "x-rapidapi-key": process.env.RAPIDAPI_KEY ?? process.env.RAPIDAPI_ACCESS_TOKEN ?? "",
           "x-rapidapi-host": "whatsapp-profile-data1.p.rapidapi.com",
           "Content-Type": "application/json",
         },
