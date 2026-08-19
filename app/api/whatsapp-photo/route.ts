@@ -67,7 +67,10 @@ export async function POST(request: NextRequest) {
 
     const cleanNumber = phone.replace(/\D/g, "")
     const cleanCountryCode = countryCode?.replace(/\D/g, "") || ""
-    const fullPhone = cleanCountryCode + cleanNumber
+    // Evita enviar o código do país duas vezes quando o usuário já digitou o número completo.
+    const fullPhone = cleanCountryCode && cleanNumber.startsWith(cleanCountryCode)
+      ? cleanNumber
+      : cleanCountryCode + cleanNumber
     
     console.log("[v0] ========== WHATSAPP API ROUTE ==========")
     console.log("[v0] Phone received:", phone)
@@ -109,10 +112,7 @@ export async function POST(request: NextRequest) {
         }),
       })
 
-      console.log("[v0] WhatsApp profile API response status:", response.status)
-
       const responseText = await response.text()
-      console.log("[v0] WhatsApp profile API response status:", response.status)
 
       if (response.ok && responseText) {
         let payload: unknown = responseText
@@ -134,12 +134,7 @@ export async function POST(request: NextRequest) {
     if (!photoUrl || !photoUrl.startsWith("http")) {
       console.log("[v0] No valid photo found, using fallback")
       
-      // Armazena fallback no cache para este numero
-      cache.set(fullPhone, {
-        result: fallbackPhoto,
-        timestamp: Date.now(),
-      })
-      
+      // Nunca armazenamos fallback: uma falha temporária não pode esconder uma foto real.
       return NextResponse.json(fallbackPayload, {
         status: 200,
         headers: { "Access-Control-Allow-Origin": "*" },
