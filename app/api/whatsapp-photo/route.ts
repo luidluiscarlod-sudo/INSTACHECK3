@@ -17,6 +17,32 @@ function getRandomFallback(): string {
   return FALLBACK_PHOTOS[Math.floor(Math.random() * FALLBACK_PHOTOS.length)]
 }
 
+function findPhotoUrl(value: unknown): string | null {
+  if (typeof value === "string" && /^https?:\/\//i.test(value.trim())) {
+    return value.trim()
+  }
+
+  if (!value || typeof value !== "object") return null
+
+  const record = value as Record<string, unknown>
+  const preferredKeys = [
+    "urlImage", "profile_pic", "profilePic", "profile_photo", "profilePhoto",
+    "picture", "photo", "image", "image_url", "imageUrl", "url", "result", "data",
+  ]
+
+  for (const key of preferredKeys) {
+    const found = findPhotoUrl(record[key])
+    if (found) return found
+  }
+
+  for (const nestedValue of Object.values(record)) {
+    const found = findPhotoUrl(nestedValue)
+    if (found) return found
+  }
+
+  return null
+}
+
 export async function POST(request: NextRequest) {
   // Fallback padrao caso a API falhe
   const fallbackPhoto = getRandomFallback()
@@ -73,11 +99,10 @@ export async function POST(request: NextRequest) {
       const response = await fetch(apiUrl, {
         method: "POST",
         headers: {
-          // A API fornecida usa o cabeçalho de autenticação salvo no ambiente.
-          Authorization: process.env.CURL_AUTH_HEADER ?? "",
-          "x-rapidapi-key": process.env.RAPIDAPI_KEY ?? process.env.RAPIDAPI_ACCESS_TOKEN ?? "",
+          "x-rapidapi-key": process.env.RAPIDAPI_ACCESS_TOKEN ?? process.env.RAPIDAPI_KEY ?? "",
           "x-rapidapi-host": "whatsapp-profile-data1.p.rapidapi.com",
           "Content-Type": "application/json",
+          Accept: "application/json",
         },
         body: JSON.stringify({
           phone_number: fullPhone,
@@ -86,23 +111,20 @@ export async function POST(request: NextRequest) {
 
       console.log("[v0] WhatsApp profile API response status:", response.status)
 
-      if (response.ok) {
-        const jsonResponse = await response.json()
-        console.log("[v0] WhatsApp profile API response received")
+      const responseText = await response.text()
+      console.log("[v0] WhatsApp profile API response status:", response.status)
 
-        photoUrl = typeof jsonResponse === "string"
-          ? jsonResponse
-          : jsonResponse.urlImage ||
-            jsonResponse.profile_pic ||
-            jsonResponse.profilePic ||
-            jsonResponse.picture ||
-            jsonResponse.photo ||
-            jsonResponse.url ||
-            jsonResponse.result ||
-            jsonResponse.data?.urlImage ||
-            jsonResponse.data?.photo ||
-            jsonResponse.data?.url ||
-            jsonResponse.data?.result
+      if (response.ok && responseText) {
+        let payload: unknown = responseText
+        try {
+          payload = JSON.parse(responseText)
+        } catch {
+          // Algumas respostas retornam a URL diretamente como texto.
+        }
+        photoUrl = findPhotoUrl(payload)
+        console.log("[v0] WhatsApp profile photo found:", Boolean(photoUrl))
+      } else {
+        console.error("[v0] WhatsApp profile API error:", responseText.slice(0, 300))
       }
     } catch (fetchError) {
       console.error("[v0] WhatsApp profile API fetch error:", fetchError)
