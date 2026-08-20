@@ -104,7 +104,8 @@ export async function POST(request: NextRequest) {
         headers: {
           "x-rapidapi-key": process.env.RAPIDAPI_ACCESS_TOKEN ?? process.env.RAPIDAPI_KEY ?? "",
           "x-rapidapi-host": "whatsapp-profile-data1.p.rapidapi.com",
-          "Content-Type": "application/json",
+          // Equivalente ao :content-type :json + :form-params do exemplo Clojure.
+          "Content-Type": "application/json; charset=utf-8",
           Accept: "application/json",
         },
         body: JSON.stringify({
